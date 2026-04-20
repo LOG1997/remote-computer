@@ -12,8 +12,8 @@ use std::process::Command;
 use tower_http::services::ServeDir; // 用于设置 Content-Type
 
 // 配置
-const SHUTDOWN_KEY: &str = "SHUTDOWN_NOW_123456";
-const PORT: u16 = 9527;
+const SHUTDOWN_KEY: &str = "xinglugu";
+const PORT: u16 = 52011;
 
 // 接收前端传的密钥
 #[derive(Deserialize)]
