@@ -97,7 +97,7 @@ export function ShutDownForm() {
         setIsDialogOpen(false)
         const values = {
             address: 'https://' + form.getFieldValue('address') + '/shutdown',
-            data: { key: form.getFieldValue('password') },
+            data: { key: form.getFieldValue('password'), immediate: form.getFieldValue('immediate') },
         }
         try {
             await mutation.mutateAsync(values)

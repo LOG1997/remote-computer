@@ -19,6 +19,7 @@ const PORT: u16 = 9527;
 #[derive(Deserialize)]
 struct ShutdownRequest {
     key: String,
+    immediate: bool,
 }
 
 fn get_app_dir() -> PathBuf {
@@ -41,7 +42,6 @@ async fn main() {
     } else {
         "production".to_string()
     };
-    println!("mode: {}", mode);
     // 1. 加载自签名证书
     let cert_path = if mode == "dev" {
         "cert.pem".into() // 开发环境证书路径，请根据实际情况修改
@@ -65,11 +65,6 @@ async fn main() {
     println!("📡 端口: {}", PORT);
     println!("🔑 密钥: {}", SHUTDOWN_KEY);
 
-    // let static_files_service = if mode == "dev" {
-    //     ServeDir::new("../client/apps/web/web")
-    // } else {
-    //     ServeDir::new("./web")
-    // };
     let static_files_root = if is_dev {
         "../client/apps/web/web".into()
     } else {
@@ -88,8 +83,6 @@ async fn main() {
 
     // 启动服务
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], PORT));
-    // let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    // axum::serve(listener, app).await.unwrap();
     axum_server::bind_rustls(addr, tls_config)
         .serve(app.into_make_service())
         .await
@@ -135,8 +128,9 @@ async fn shutdown_handler(
     Json(body): Json<ShutdownRequest>,
 ) -> (StatusCode, Json<serde_json::Value>) {
     if body.key == SHUTDOWN_KEY {
+        let immediate = body.immediate;
         // 执行关机
-        execute_shutdown();
+        execute_shutdown(immediate);
 
         return (
             StatusCode::OK,
@@ -157,7 +151,7 @@ async fn shutdown_handler(
 }
 
 // 跨平台关机
-fn execute_shutdown() {
+fn execute_shutdown(immediate: bool) {
     println!("正在执行关机指令...");
 
     #[cfg(target_os = "windows")]
@@ -167,7 +161,10 @@ fn execute_shutdown() {
         match Command::new("shutdown")
             .arg("/s")
             .arg("/t")
-            .arg("60")
+            .arg(match immediate {
+                true => "0",
+                false => "60",
+            })
             .output()
         {
             Ok(output) => {
@@ -187,29 +184,32 @@ fn execute_shutdown() {
     #[cfg(target_os = "linux")]
     {
         // Linux 尝试多种方案
-        println!("正在尝试 Linux 关机...")
+        println!("正在尝试 Linux 关机...");
         // 方案 1: 使用 systemctl (现代大多数 Linux 发行版推荐，且如果服务以 root 运行则无需 sudo)
         // 尝试直接执行 shutdown (如果程序以 root 运行)
-        // let status = Command::new("shutdown")
-        //     .arg("-h")
-        //     .arg("+1") // +1 表示 1 分钟后关机
-        //     .status();
+        let status = Command::new("shutdown")
+            .arg("-h")
+            .arg(match immediate {
+                true => "now",
+                false => "+1",
+            }) // +1 表示 1 分钟后关机
+            .status();
 
-        // match status {
-        //     Ok(exit_status) => {
-        //         if exit_status.success() {
-        //             println!("Linux systemctl poweroff 执行成功");
-        //         } else {
-        //             eprintln!("systemctl poweroff 失败, 退出码: {:?}", exit_status.code());
-        //             // 如果失败，尝试传统 shutdown
-        //             fallback_shutdown_linux();
-        //         }
-        //     }
-        //     Err(e) => {
-        //         eprintln!("执行 systemctl 出错: {}, 尝试备用方案", e);
-        //         // fallback_shutdown_linux();
-        //     }
-        // }
+        match status {
+            Ok(exit_status) => {
+                if exit_status.success() {
+                    println!("关机命令执行成功");
+                } else {
+                    eprintln!("关机命令执行失败, 退出码: {:?}", exit_status.code());
+                    // 如果失败，尝试传统 shutdown
+                    fallback_shutdown_linux();
+                }
+            }
+            Err(e) => {
+                eprintln!("执行 systemctl 出错: {}, 尝试备用方案", e);
+                // fallback_shutdown_linux();
+            }
+        }
     }
 }
 
