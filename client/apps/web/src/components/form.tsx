@@ -3,6 +3,7 @@ import { toast } from "sonner"
 import * as z from "zod"
 import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
+import { Power, RotateCw } from 'lucide-react'
 import {
     Card,
     CardContent,
@@ -111,7 +112,7 @@ export function ShutDownForm() {
         console.log('sendReboot')
     }
     return (
-        <Card className="w-full sm:max-w-md">
+        <Card className="w-full sm:max-w-md px-2">
             <CardHeader>
                 <CardTitle>远程关机</CardTitle>
                 <CardDescription>
@@ -207,8 +208,14 @@ export function ShutDownForm() {
             </CardContent>
             <CardFooter>
                 <Field orientation="horizontal" className="flex w-full justify-center">
-                    <Button type="button" variant="destructive" onClick={sendShutDown}>关机</Button>
-                    <Button type="button" variant="destructive" onClick={sendReboot}>重启</Button>
+                    <Button className="cursor-pointer" type="button" size="lg" variant="destructive" onClick={sendShutDown}>
+                        <Power />
+                        关机
+                    </Button>
+                    <Button className="cursor-pointer" type="button" size="lg" variant="destructive" onClick={sendReboot}>
+                        <RotateCw />
+                        重启
+                    </Button>
                 </Field>
             </CardFooter>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
