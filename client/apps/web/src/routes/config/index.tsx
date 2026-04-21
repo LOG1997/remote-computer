@@ -56,7 +56,7 @@ const formSchema = z.object({
 })
 function Configuration() {
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { hostname, port } = window.location
+    const { hostname, port: localPort } = window.location
 
     console.log(location)
     // 1. 用于触发查询的状态
@@ -67,7 +67,7 @@ function Configuration() {
     const form = useForm({
         defaultValues: {
             host: configData?.host || hostname,
-            port: configData?.port.toString() || port,
+            port: configData?.port.toString() || localPort,
             local: configData ? false : true,
         },
         validators: {
@@ -97,7 +97,10 @@ function Configuration() {
         setIsDialogOpen(true)
 
     }
-
+    const setDefaultConfig = () => {
+        form.setFieldValue('host', hostname)
+        form.setFieldValue('port', localPort)
+    }
     const handleConfirm = () => {
         setIsDialogOpen(false)
         const host = form.getFieldValue('host')
@@ -146,7 +149,7 @@ function Configuration() {
                                                     aria-invalid={isInvalid}
                                                     placeholder="电脑的ip地址"
                                                 />
-                                                <Button>使用默认</Button>
+                                                <Button onClick={setDefaultConfig}>使用默认地址</Button>
                                             </ButtonGroup>
 
                                             {isInvalid && (
