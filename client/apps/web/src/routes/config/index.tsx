@@ -1,10 +1,9 @@
-import { createFileRoute, useLocation } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { useForm } from "@tanstack/react-form"
-import { toast } from "sonner"
 import * as z from "zod"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import { Button } from "@workspace/ui/components/button"
-import { Save, CircleCheckBig, InfoIcon } from 'lucide-react'
+import { Save, CircleCheckBig, X } from 'lucide-react'
 import {
     Card,
     CardContent,
@@ -19,20 +18,12 @@ import {
     FieldGroup,
     FieldLabel,
 } from "@workspace/ui/components/field"
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Input } from "@workspace/ui/components/input"
 import { useConfigurationStore } from '@/stores'
 import { getDeviceStatus } from '@/apis';
 import CustomDialog from '@/components/Dialog'
 import { Spinner } from '@workspace/ui/components/spinner'
-import { Checkbox } from "@workspace/ui/components/checkbox"
-import {
-    InputGroup,
-    InputGroupAddon,
-    InputGroupInput,
-    InputGroupText,
-
-} from "@workspace/ui/components/input-group"
 import { ButtonGroup } from "@workspace/ui/components/button-group"
 export const Route = createFileRoute('/config/')({
     component: Configuration,
@@ -55,20 +46,19 @@ const formSchema = z.object({
         .refine((val) => val >= 1 && val <= 65535, { message: "端口范围必须在 1-65535 之间" }),
 })
 function Configuration() {
+    const router = useRouter()
     const [isDialogOpen, setIsDialogOpen] = useState(false)
-    const { hostname, port: localPort } = window.location
-
+    const { hostname, port: localPort, protocol } = window.location
+    console.log(window.location)
     console.log(location)
     // 1. 用于触发查询的状态
     const [queryUrl, setQueryUrl] = useState<string | null>(null)
     const configData = useConfigurationStore((state) => state.config)
     const setConfig = useConfigurationStore((state) => state.setConfig)
-    const clearConfig = useConfigurationStore((state) => state.clearConfig)
     const form = useForm({
         defaultValues: {
             host: configData?.host || hostname,
             port: configData?.port.toString() || localPort,
-            local: configData ? false : true,
         },
         validators: {
             onSubmit: formSchema,
@@ -80,7 +70,7 @@ function Configuration() {
         queryFn: async () => {
             if (!queryUrl) throw new Error("No URL provided")
             const response = await getDeviceStatus({ config: { baseUrl: queryUrl } })
-            console.log('resss', response)
+            console.log(response)
             return response
         },
         // 只有当 queryUrl 存在时才启用查询
@@ -92,7 +82,7 @@ function Configuration() {
         const host = form.getFieldValue('host')
         const port = form.getFieldValue('port')
         console.log('host', host, port)
-        const baseUrl = "http://" + host + ":" + port
+        const baseUrl = protocol + "//" + host + ":" + port
         setQueryUrl(baseUrl)
         setIsDialogOpen(true)
 
@@ -109,9 +99,9 @@ function Configuration() {
             host,
             port
         })
+        // 路由跳转
+        router.navigate({ to: '/dashboard', replace: true })
     }
-
-    // 监听
     return (
         <>
             <Card className="w-full sm:max-w-md px-2">
@@ -211,13 +201,17 @@ function Configuration() {
                                 重试
                             </Button>
                         </div>
-                    ) : isSuccess && data ? (
+                    ) : isSuccess && data && data.ok ? (
                         <div className="flex flex-col items-center gap-2 text-green-600 dark:text-green-500">
                             <p className="font-medium">连接成功</p>
                             <CircleCheckBig className='text-green-500' />
                         </div >
                     ) : (
-                        <p className="text-sm text-muted-foreground">点击保存以验证连接...</p>
+                        <div className="flex flex-col items-center gap-2 text-red-600 dark:text-red-500">
+                            <p className="font-medium">连接失败</p>
+                            <X className='text-red-500' />
+                            <p className="text-sm text-gray-300/70">您仍可以保存配置</p>
+                        </div >
                     )
                     }
                 </div >

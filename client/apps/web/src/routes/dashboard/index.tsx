@@ -18,7 +18,7 @@ export const Route = createFileRoute('/dashboard/')({
 })
 function Dashboard() {
     const configData = useConfigurationStore((state) => state.config)
-    const statusInfo = useQuery({ queryKey: ['deviceStatu111s'], queryFn: () => getDeviceStatus({ config: { baseUrl: "https://" + configData?.ip + ":" + configData?.port } }) })
+    const statusInfo = useQuery({ queryKey: ['deviceStatus'], queryFn: () => getDeviceStatus({ config: { baseUrl: "https://" + configData?.ip + ":" + configData?.port } }) })
     console.log(statusInfo);
     return (
         <div>
