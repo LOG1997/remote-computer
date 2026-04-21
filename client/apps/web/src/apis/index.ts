@@ -19,3 +19,12 @@ export const getDeviceStatus = ({ config }: { config: any }) => {
         },
     })
 }
+
+export const getDeviceInfo = ({ config }: { config: any }) => {
+    return fetch(config.baseUrl + '/getDeviceInfo', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    })
+}

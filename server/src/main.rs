@@ -16,7 +16,7 @@ use common::config::AppConfig;
 
 mod api;
 mod system;
-use api::handle::{get_device_status, reboot_handler, shutdown_handler};
+use api::handle::{get_device_status, get_system_info, reboot_handler, shutdown_handler};
 
 // 关机主函数
 #[tokio::main]
@@ -59,6 +59,7 @@ async fn main() {
         .fallback_service(static_files_service)
         .route("/shutdown", post(shutdown_handler))
         .route("/getStatus", post(get_device_status))
+        .route("/getDeviceInfo", post(get_system_info))
         .route("/reboot", post(reboot_handler))
         // 允许跨域 → 网页必须
         .layer(tower_http::cors::CorsLayer::permissive());

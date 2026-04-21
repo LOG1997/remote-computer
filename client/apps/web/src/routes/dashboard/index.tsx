@@ -11,15 +11,29 @@ import {
     CardTitle,
 } from "@workspace/ui/components/card"
 import { useQuery } from "@tanstack/react-query"
-import { getDeviceStatus } from '@/apis'
+import { getDeviceStatus, getDeviceInfo } from '@/apis'
 import { useConfigurationStore } from '@/stores'
 export const Route = createFileRoute('/dashboard/')({
     component: Dashboard,
 })
 function Dashboard() {
     const configData = useConfigurationStore((state) => state.config)
-    const statusInfo = useQuery({ queryKey: ['deviceStatus'], queryFn: () => getDeviceStatus({ config: { baseUrl: "https://" + configData?.ip + ":" + configData?.port } }) })
-    console.log(statusInfo);
+    const { protocol } = window.location
+    const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
+    const { data, isLoading, error, refetch, isSuccess, isError } = useQuery({
+        queryKey: ['deviceStatus', baseUrl],
+        queryFn: async () => {
+            if (!baseUrl) throw new Error("No URL provided")
+            const response = await getDeviceInfo({ config: { baseUrl } })
+            console.log(response)
+            return response
+        },
+        // 只有当 queryUrl 存在时才启用查询
+        enabled: !!baseUrl,
+        // 可选：配置重试次数等
+        retry: 1,
+    })
+    console.log(data);
     return (
         <div>
             <Card className="relative mx-auto w-full max-w-sm pt-0">

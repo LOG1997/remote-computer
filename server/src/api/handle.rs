@@ -3,7 +3,7 @@ use crate::common::config::AppConfig;
 use crate::system;
 use axum::{extract::Json, http::StatusCode};
 use serde::Deserialize;
-use system::operate::{execute_reboot, execute_shutdown};
+use system::operate::{execute_reboot, execute_shutdown, get_system_info_json};
 
 #[derive(Deserialize)]
 pub struct ShutdownRequest {
@@ -28,7 +28,8 @@ pub async fn shutdown_handler(
             StatusCode::OK,
             Json(serde_json::json!({
                 "code": 0,
-                "msg": "关机指令已执行"
+                "msg": "关机指令已执行",
+                "success": true,
             })),
         );
     }
@@ -37,7 +38,8 @@ pub async fn shutdown_handler(
         StatusCode::FORBIDDEN,
         Json(serde_json::json!({
             "code": -1,
-            "msg": "密钥错误"
+            "msg": "密钥错误",
+            "success": false,
         })),
     )
 }
@@ -58,7 +60,8 @@ pub async fn reboot_handler(
             StatusCode::OK,
             Json(serde_json::json!({
                 "code": 0,
-                "msg": "重启指令已执行"
+                "msg": "重启指令已执行",
+                "success":true
             })),
         );
     }
@@ -67,7 +70,8 @@ pub async fn reboot_handler(
         StatusCode::FORBIDDEN,
         Json(serde_json::json!({
             "code": -1,
-            "msg": "密钥错误"
+            "msg": "密钥错误",
+            "success":false
         })),
     )
 }
@@ -79,7 +83,26 @@ pub async fn get_device_status() -> (StatusCode, Json<serde_json::Value>) {
         Json(serde_json::json!({
             "code": 0,
             "msg": "状态已发送",
+            "success":true,
             "data":{}
+        })),
+    );
+}
+
+pub async fn get_system_info() -> (StatusCode, Json<serde_json::Value>) {
+    println!("get_system_info_json");
+    let system_info = get_system_info_json();
+    let data_json = match system_info {
+        Some(info) => serde_json::to_value(info).unwrap_or(serde_json::Value::Null),
+        None => serde_json::Value::Object(serde_json::Map::new()), // 返回空对象 {}
+    };
+    return (
+        StatusCode::OK,
+        Json(serde_json::json!({
+            "code": 0,
+            "msg": "状态已发送",
+            "success":true,
+            "data": data_json
         })),
     );
 }

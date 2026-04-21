@@ -18,3 +18,5 @@ axum-server = { version = "0.8.0", features = ["tls-rustls"] }
 hyper = "1.9.0"
 http = "1.4.0"
 toml = "1.1.2"
+sysinfo = "0.38.4"
+chrono = "0.4.44"
