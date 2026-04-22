@@ -67,7 +67,7 @@ export default function OsCard(props: OsProps) {
                                     <Tag size='1rem' />
                                     <p className="text-xs text-muted-foreground">频率</p>
                                 </div>
-                                <div >
+                                <div>
                                     <span className="text-sm font-bold">{Math.floor(Number(data.frequency) / 100).toFixed(1)}</span>
                                     <span className="text-[0.5rem] self-baseline text-muted-foreground">Ghz</span>
                                 </div>
@@ -78,7 +78,7 @@ export default function OsCard(props: OsProps) {
                                     <p className="text-xs text-muted-foreground">温度</p>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-bold">{data.temperature}</p>
+                                    <span className="text-sm font-bold">{Number(data.temperature).toFixed(1)}</span>
                                     <span>℃</span>
                                 </div>
                             </div>

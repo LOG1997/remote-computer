@@ -146,6 +146,7 @@ pub struct CpuInfo {
     pub brand: String,
     pub frequency: u64, // MHz
     pub usage: f32,     // 整体 CPU 使用率 %
+    pub temperature: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -195,12 +196,13 @@ pub fn get_system_info_json() -> Option<SystemInfoResponse> {
     let global_cpu_usage = sys.global_cpu_usage();
     let first_cpu = cpus.first();
 
-    let cpu_info = CpuInfo {
+    let mut cpu_info = CpuInfo {
         physical_core_count: System::physical_core_count().unwrap_or(0),
         total_core_count: cpus.len(),
         brand: first_cpu.map(|c| c.brand().to_string()).unwrap_or_default(),
         frequency: first_cpu.map(|c| c.frequency()).unwrap_or(0),
         usage: global_cpu_usage,
+        temperature: 0.0,
     };
 
     // 3. 内存信息
@@ -238,12 +240,17 @@ pub fn get_system_info_json() -> Option<SystemInfoResponse> {
         })
         .collect();
     // 计算CPU平均温度
-    // let cpu_ava_temp = components
-    //     .iter()
-    //     .map(|comp| comp.temperature().unwrap_or(0.0))
-    //     .sum::<f32>()
-    //     / components.len() as f32;
-    // println!("CPU平均温度: {}°C", cpu_ava_temp);
+    let cpu_comp: Vec<&sysinfo::Component> = components
+        .iter()
+        .filter(|comp| comp.label().contains("Core"))
+        .collect();
+    let cpu_ava_temp = cpu_comp
+        .iter()
+        .map(|comp| comp.temperature().unwrap_or(0.0))
+        .sum::<f32>()
+        / cpu_comp.len() as f32;
+    println!("CPU平均温度: {}°C", cpu_ava_temp);
+    cpu_info.temperature = cpu_ava_temp;
     // 组装最终结构
     let system_info = SystemInfoResponse {
         os: os_info,
