@@ -1,18 +1,11 @@
-import { Button } from "@workspace/ui/components/button"
 import {
     Card,
-    CardAction,
-    CardDescription,
-    CardFooter,
     CardHeader,
-    CardTitle,
     CardContent,
 } from "@workspace/ui/components/card"
-import { Badge } from "@workspace/ui/components/badge"
 import { Spinner } from "@workspace/ui/components/spinner"
-import { Server, Tag, Cpu, Microchip, Thermometer } from "lucide-react"
+import { Microchip, Thermometer, AudioWaveform } from "lucide-react"
 import CpuIcon from './-deviceIcon'
-import { TrendingUp } from "lucide-react"
 import { Chart } from './-chart'
 
 interface OsProps {
@@ -64,21 +57,21 @@ export default function OsCard(props: OsProps) {
                             </div>
                             <div id="cpu-frequency" className="flex flex-col gap-3 border-gray-200 pl-4">
                                 <div className="flex gap-2 items-center">
-                                    <Tag size='1rem' />
+                                    <AudioWaveform size='1rem' />
                                     <p className="text-xs text-muted-foreground">频率</p>
                                 </div>
                                 <div>
-                                    <span className="text-sm font-bold">{Math.floor(Number(data.frequency) / 100).toFixed(1)}</span>
+                                    <span className="text-sm font-bold">{Math.floor(Number(data.frequency) / 1000).toFixed(1)}</span>
                                     <span className="text-[0.5rem] self-baseline text-muted-foreground">Ghz</span>
                                 </div>
                             </div>
                             <div id="cpu-temperature" className="flex flex-col gap-3 border-gray-200 pl-4">
                                 <div className="flex gap-2 items-center">
-                                    <Tag size='1rem' />
+                                    <Thermometer size='1rem' />
                                     <p className="text-xs text-muted-foreground">温度</p>
                                 </div>
                                 <div>
-                                    <span className="text-sm font-bold">{Number(data.temperature).toFixed(1)}</span>
+                                    <span className="text-sm font-bold">{data.temperature ? Number(data.temperature).toFixed(1) : '--'}</span>
                                     <span>℃</span>
                                 </div>
                             </div>

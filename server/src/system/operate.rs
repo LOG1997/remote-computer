@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json;
 use std::process::Command;
-use sysinfo::{Components, CpuRefreshKind, Disks, Networks, System};
+use sysinfo::{Components, CpuRefreshKind, Disks, Networks, Process, System};
 
 pub fn execute_shutdown(immediate: bool) {
     println!("正在执行关机指令...");
@@ -153,6 +153,7 @@ pub struct CpuInfo {
 pub struct MemoryInfo {
     pub total_memory: u64, // bytes
     pub used_memory: u64,  // bytes
+    pub free_memory: u64,  // bytes
     pub total_swap: u64,   // bytes
     pub used_swap: u64,    // bytes
 }
@@ -209,6 +210,7 @@ pub fn get_system_info_json() -> Option<SystemInfoResponse> {
     let memory_info = MemoryInfo {
         total_memory: sys.total_memory(),
         used_memory: sys.used_memory(),
+        free_memory: sys.free_memory(),
         total_swap: sys.total_swap(),
         used_swap: sys.used_swap(),
     };
@@ -260,6 +262,4 @@ pub fn get_system_info_json() -> Option<SystemInfoResponse> {
         components: component_infos,
     };
     Some(system_info)
-    // 序列化为 JSON
-    // serde_json::to_string_pretty(&system_info)
 }

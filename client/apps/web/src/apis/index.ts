@@ -11,13 +11,18 @@ export const sendShutDownCommand = ({ data, config }: { data?: any, config: any 
     })
 }
 
-export const getDeviceStatus = ({ config }: { config: any }) => {
-    return fetch(config.baseUrl + '/getStatus', {
+export const getDeviceStatus = async ({ config }: { config: any }) => {
+    const response = await fetch(config.baseUrl + '/getStatus', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
     })
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return response.json();
 }
 
 export const getDeviceInfo = async ({ config }: { config: any }) => {

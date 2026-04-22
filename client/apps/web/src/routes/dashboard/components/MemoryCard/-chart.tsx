@@ -12,12 +12,13 @@ import {
 } from "@workspace/ui/components/chart"
 interface Props {
     className?: string
-    num: number | string
+    usedMemory: number | string
+    totalMemory: number | string
 }
 export function Chart(props: Props) {
-    const { num = 0 } = props
+    const { usedMemory = 1, totalMemory = 0 } = props
     const chartData = [
-        { browser: "safari", visitors: num, fill: "var(--color-safari)" },
+        { browser: "safari", visitors: 100 * Number(usedMemory) / Number(totalMemory), fill: "var(--color-safari)" },
     ]
 
     const chartConfig = {
@@ -40,7 +41,7 @@ export function Chart(props: Props) {
                 <RadialBarChart
                     data={chartData}
                     startAngle={0}
-                    endAngle={360 * Number(num) / 100}
+                    endAngle={360 * Number(usedMemory) / Number(totalMemory)}
                     outerRadius={24}
                     innerRadius={20}
                 >

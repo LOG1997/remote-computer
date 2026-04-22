@@ -1,15 +1,9 @@
-import { Button } from "@workspace/ui/components/button"
 import {
     Card,
-    CardAction,
-    CardDescription,
-    CardFooter,
     CardHeader,
-    CardTitle,
     CardContent,
 } from "@workspace/ui/components/card"
 import DeviceIcon from "./-deviceIcon"
-import { Badge } from "@workspace/ui/components/badge"
 import { Spinner } from "@workspace/ui/components/spinner"
 import { Server, Tag } from "lucide-react"
 
