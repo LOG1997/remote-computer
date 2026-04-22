@@ -34,7 +34,7 @@ export default function OsCard(props: OsProps) {
                         <CardHeader className="flex items-center border-b pt-4">
                             <div className='flex items-center gap-2' title={data.brand}>
                                 <CpuIcon cpu={data.brand} />
-                                <p className="truncate w-2/3">{data.brand}</p>
+                                <p className="truncate w-15/16 break-all">{data.brand}</p>
                             </div>
                         </CardHeader>
                         <CardContent className="grid grid-cols-4">

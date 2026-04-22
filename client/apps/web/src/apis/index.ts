@@ -1,14 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import request from './request'
 
 
-export const sendShutDownCommand = ({ data, config }: { data?: any, config: any }) => {
-    return request({
-        baseUrl: config ? config.baseUrl : undefined,
-        url: '/api/device/shutdown',
-        method: 'post',
-        data
+export const sendShutDownCommand = async ({ data, config }: { data?: { key: string, immediate: boolean }, config: any }) => {
+    const response = await fetch(config.baseUrl + '/shutdown', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
     })
+    console.log('resppp', response)
+    // if (!response.ok) {
+    //     throw new Error(`HTTP error! status: ${response.status}`);
+    // }
+
+    return response.json();
 }
 
 export const getDeviceStatus = async ({ config }: { config: any }) => {

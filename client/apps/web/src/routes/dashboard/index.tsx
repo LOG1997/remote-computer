@@ -1,15 +1,5 @@
 
 import { createFileRoute } from '@tanstack/react-router'
-import { Badge } from "@workspace/ui/components/badge"
-import { Button } from "@workspace/ui/components/button"
-import {
-    Card,
-    CardAction,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@workspace/ui/components/card"
 import { useQuery } from "@tanstack/react-query"
 import { getDeviceStatus, getDeviceInfo } from '@/apis'
 import { useConfigurationStore } from '@/stores'
@@ -25,7 +15,7 @@ function Dashboard() {
     const configData = useConfigurationStore((state) => state.config)
     const { protocol } = window.location
     const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
-    const { data: deviceData, isLoading, error, refetch: refetchDeviceInfo, isSuccess, isError } = useQuery({
+    const { data: deviceData, isLoading, refetch: refetchDeviceInfo, isSuccess, isError } = useQuery({
         queryKey: ['deviceInfo', baseUrl],
         queryFn: async () => {
             if (!baseUrl) throw new Error("No URL provided")

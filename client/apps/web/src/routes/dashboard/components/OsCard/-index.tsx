@@ -31,7 +31,7 @@ export default function OsCard(props: OsProps) {
                         <CardHeader className="flex items-center border-b pt-4">
                             <div className='flex items-center gap-2' title={data.host_name}>
                                 <DeviceIcon device={data?.platform} />
-                                <p className="truncate w-2/3">{data.host_name}</p>
+                                <p className="truncate w-15/16 break-all">{data.host_name}</p>
                             </div>
                             {/* TODO:展示别的状态 */}
                             <div>
