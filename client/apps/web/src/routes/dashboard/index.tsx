@@ -11,7 +11,7 @@ import { useEffect } from 'react'
 
 export const Route = createFileRoute('/dashboard/')({
     component: Dashboard,
-    loader: async ({ context }) => {
+    loader: async () => {
         return {
             meta: {
                 back: '/config',
