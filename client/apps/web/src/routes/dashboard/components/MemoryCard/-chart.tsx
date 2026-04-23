@@ -6,10 +6,6 @@ import {
     RadialBarChart,
 } from "recharts"
 
-import {
-    ChartContainer,
-    type ChartConfig,
-} from "@workspace/ui/components/chart"
 interface Props {
     className?: string
     usedMemory: number | string
@@ -21,65 +17,52 @@ export function Chart(props: Props) {
         { browser: "safari", visitors: 100 * Number(usedMemory) / Number(totalMemory), fill: "var(--color-safari)" },
     ]
 
-    const chartConfig = {
-        visitors: {
-            label: "Visitors",
-        },
-        safari: {
-            label: "Safari",
-            color: "var(--chart-2)",
-
-        },
-    } satisfies ChartConfig
     return (
         <div className="flex flex-col w-full">
 
-            <ChartContainer
-                config={chartConfig}
-                className="mx-auto aspect-square max-h-12 w-full h-full"
+
+            <RadialBarChart
+                style={{ width: '100%', maxWidth: '4rem', maxHeight: '4rem', aspectRatio: 1 }}
+                data={chartData}
+                startAngle={0}
+                endAngle={360 * Number(usedMemory) / Number(totalMemory)}
+                outerRadius={24}
+                innerRadius={20}
             >
-                <RadialBarChart
-                    data={chartData}
-                    startAngle={0}
-                    endAngle={360 * Number(usedMemory) / Number(totalMemory)}
-                    outerRadius={24}
-                    innerRadius={20}
-                >
-                    <PolarGrid
-                        gridType="circle"
-                        radialLines={false}
-                        stroke="none"
-                        className="first:fill-muted last:fill-background "
-                        polarRadius={[24, 20]}
-                    />
-                    <RadialBar fill="red" dataKey="visitors" className="" background={true} cornerRadius={10} />
-                    <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
-                        <Label
-                            content={({ viewBox }) => {
-                                if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                                    return (
-                                        <text
+                <PolarGrid
+                    style={{ width: '100%', maxWidth: '4rem', maxHeight: '4rem', aspectRatio: 1 }}
+                    gridType="circle"
+                    radialLines={false}
+                    stroke="none"
+                    className="first:fill-muted last:fill-background "
+                    polarRadius={[24, 20]}
+                />
+                <RadialBar fill="red" dataKey="visitors" className="" background={true} cornerRadius={10} />
+                <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+                    <Label
+                        content={({ viewBox }) => {
+                            if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                return (
+                                    <text
+                                        x={viewBox.cx}
+                                        y={viewBox.cy}
+                                        textAnchor="middle"
+                                        dominantBaseline="middle"
+                                    >
+                                        <tspan
                                             x={viewBox.cx}
                                             y={viewBox.cy}
-                                            textAnchor="middle"
-                                            dominantBaseline="middle"
+                                            className="fill-foreground text-xs font-bold"
                                         >
-                                            <tspan
-                                                x={viewBox.cx}
-                                                y={viewBox.cy}
-                                                className="fill-foreground text-xs font-bold"
-                                            >
-                                                {Number(chartData[0].visitors).toFixed(1).toLocaleString()}%
-                                            </tspan>
-                                        </text>
-                                    )
-                                }
-                            }}
-                        />
-                    </PolarRadiusAxis>
-                </RadialBarChart>
-            </ChartContainer>
-
+                                            {Number(chartData[0].visitors).toFixed(1).toLocaleString()}%
+                                        </tspan>
+                                    </text>
+                                )
+                            }
+                        }}
+                    />
+                </PolarRadiusAxis>
+            </RadialBarChart>
         </div>
     )
 }

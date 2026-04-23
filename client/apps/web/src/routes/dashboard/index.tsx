@@ -15,7 +15,7 @@ function Dashboard() {
     const configData = useConfigurationStore((state) => state.config)
     const { protocol } = window.location
     const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
-    const { data: deviceData, isLoading, refetch: refetchDeviceInfo, isSuccess, isError } = useQuery({
+    const { data: deviceData, isLoading } = useQuery({
         queryKey: ['deviceInfo', baseUrl],
         queryFn: async () => {
             if (!baseUrl) throw new Error("No URL provided")
@@ -29,7 +29,7 @@ function Dashboard() {
         retry: 1,
         refetchInterval: 5000,
     })
-    const { data: statusData, refetch: refetchDeviceStatus } = useQuery({
+    const { data: statusData } = useQuery({
         queryKey: ['deviceStatus', baseUrl],
         queryFn: async () => {
             if (!baseUrl) throw new Error("No URL provided")

@@ -33,7 +33,7 @@ export default function OsCard(props: MemoryProps) {
                                 <p className="truncate w-2/3">内存</p>
                             </div>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-3">
+                        <CardContent className="grid grid-cols-3 items-center">
                             <div id="memory-used" className="flex flex-col gap-3">
                                 <div className="flex gap-2 items-center">
                                     <p className="text-xs text-muted-foreground">已用</p>

@@ -37,7 +37,7 @@ export default function OsCard(props: OsProps) {
                                 <p className="truncate w-15/16 break-all">{data.brand}</p>
                             </div>
                         </CardHeader>
-                        <CardContent className="grid grid-cols-4">
+                        <CardContent className="grid grid-cols-4 items-center">
                             <div id="cpu-core" className="flex flex-col gap-3">
                                 <div className="flex gap-2 items-center">
                                     <Microchip size='1rem' />

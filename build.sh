@@ -27,6 +27,7 @@ echo "[4/4] 复制文件..."
 cp server/target/release/shutdown-auto dist/
 cp server/cert.pem dist/
 cp server/key.pem dist/
+cp server/config.toml dist/
 cp -r client/apps/web/dist/* dist/web/
 
 echo ""

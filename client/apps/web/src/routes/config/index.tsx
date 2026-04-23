@@ -201,7 +201,7 @@ function Configuration() {
                                 重试
                             </Button>
                         </div>
-                    ) : isSuccess && data && data.ok ? (
+                    ) : isSuccess && data && data.success ? (
                         <div className="flex flex-col items-center gap-2 text-green-600 dark:text-green-500">
                             <p className="font-medium">连接成功</p>
                             <CircleCheckBig className='text-green-500' />

@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite"
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from "vite"
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import { devtools } from '@tanstack/devtools-vite'
 // https://vite.dev/config/
 export default defineConfig({
     base: './',
@@ -13,6 +14,9 @@ export default defineConfig({
             autoCodeSplitting: true,
         }),
         viteReact(),
+        devtools({
+            removeDevtoolsOnBuild: true
+        }),
     ],
     resolve: {
         alias: {
@@ -22,5 +26,8 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
+    },
+    preview: {
+        port: 4575,
     },
 })

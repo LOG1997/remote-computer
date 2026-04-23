@@ -39,8 +39,7 @@ pub fn execute_shutdown(immediate: bool) {
         println!("正在尝试 Linux 关机...");
         // 方案 1: 使用 systemctl (现代大多数 Linux 发行版推荐，且如果服务以 root 运行则无需 sudo)
         // 尝试直接执行 shutdown (如果程序以 root 运行)
-        let status = Command::new("sudo")
-            .arg("/sbin/shutdown")
+        let status = Command::new("shutdown")
             .arg("-h")
             .arg(match immediate {
                 true => "now",

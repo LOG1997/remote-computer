@@ -18,5 +18,8 @@
     "packageManager": "pnpm@9.15.9",
     "engines": {
         "node": ">=20"
+    },
+    "dependencies": {
+        "@tanstack/devtools-vite": "^0.6.0"
     }
 }

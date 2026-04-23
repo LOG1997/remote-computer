@@ -51,16 +51,20 @@ async fn main() {
         app_dir.join("web") // 生产环境：/path/to/bin/web/
     };
 
-    let static_files_service = ServeDir::new(static_files_root);
+    // let static_files_service = ServeDir::new(static_files_root);
+    // 如果访问 / (根路径)，ServeDir 默认会尝试查找 index.html (取决于配置，通常需确保存在)
+    let static_files_service =
+        ServeDir::new(&static_files_root).append_index_html_on_directories(true); // 关键：访问目录时自动返回 index.html
 
     // 路由配置
     let app = Router::new()
-        .route("/", get(serve_index_html))
-        .fallback_service(static_files_service)
+        // .route("/", get(serve_index_html))
+        // .fallback_service(static_files_service)
         .route("/shutdown", post(shutdown_handler))
         .route("/getStatus", post(get_device_status))
         .route("/getDeviceInfo", post(get_system_info))
         .route("/reboot", post(reboot_handler))
+        .fallback_service(static_files_service)
         // 允许跨域 → 网页必须
         .layer(tower_http::cors::CorsLayer::permissive());
     let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));

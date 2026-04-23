@@ -64,6 +64,9 @@ if (Test-Path $exeSource) {
 Copy-Item -Path "server/cert.pem" -Destination "./dist/"
 Copy-Item -Path "server/key.pem" -Destination "./dist/"
 
+# 复制后端配置
+Copy-Item -Path "server/config.toml" -Destination "./dist/"
+
 # 复制前端构建产物 (递归复制目录内容)
 Copy-Item -Path "client/apps/web/dist/*" -Destination "./dist/web/" -Recurse
 
