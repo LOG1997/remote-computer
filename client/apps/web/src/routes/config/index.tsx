@@ -196,7 +196,8 @@ function Configuration() {
                     ) : isError ? (
                         <div className="flex flex-col items-center gap-2 text-destructive">
                             <p className="font-medium">连接失败</p>
-                            <p className="text-sm">{error.message || "无法获取设备状态，请检查地址和端口，您仍可以保存配置"}</p>
+                            <p>无法获取设备状态，请检查地址和端口，您仍可以保存配置</p>
+                            <p className="text-sm">{error.message || ""}</p>
                             <Button variant="outline" size="sm" onClick={() => refetch()}>
                                 重试
                             </Button>

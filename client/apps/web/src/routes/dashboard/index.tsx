@@ -11,6 +11,14 @@ import { useEffect } from 'react'
 
 export const Route = createFileRoute('/dashboard/')({
     component: Dashboard,
+    loader: async ({ context }) => {
+        return {
+            meta: {
+                back: '/config',
+                backName: '去配置',
+            },
+        }
+    },
 })
 function Dashboard() {
     const configData = useConfigurationStore((state) => state.config)
@@ -56,8 +64,8 @@ function Dashboard() {
         <div className='flex flex-col gap-8'>
             <StatusCard data={statusSuccess && statusData?.success} isLoading={isLoading} className='h-18' />
             <OsCard data={isDeviceInfoSuccess ? deviceData?.os : null} isLoading={isLoading} className='h-32' />
-            <CpuCard data={isDeviceInfoSuccess ? deviceData?.cpu : null} isLoading={isLoading} className='h-32' />
-            <MemoryCard data={isDeviceInfoSuccess ? deviceData?.memory : null} isLoading={isLoading} className='h-32' />
+            <CpuCard data={isDeviceInfoSuccess ? deviceData?.cpu : null} isLoading={isLoading} className='h-42' />
+            <MemoryCard data={isDeviceInfoSuccess ? deviceData?.memory : null} isLoading={isLoading} className='h-40' />
         </div>
     )
 }
