@@ -70,6 +70,10 @@ Copy-Item -Path "server/config.toml" -Destination "./dist/"
 # 复制前端构建产物 (递归复制目录内容)
 Copy-Item -Path "client/apps/web/dist/*" -Destination "./dist/web/" -Recurse
 
+# 压缩包，把dist内的文件夹和文件压缩成shutdown-remote.zip，放在dist目录中，打包最小化
+$zipFile = "shutdown-remote.zip"
+Compress-Archive -Path "./dist/*" -DestinationPath $zipFile
+
 Write-Host ""
 Write-Host "=============================================="
 Write-Host "  ✅ 打包完成！产物在 dist 文件夹"
