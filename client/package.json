@@ -20,6 +20,8 @@
         "node": ">=20"
     },
     "dependencies": {
-        "@tanstack/devtools-vite": "^0.6.0"
+        "@tanstack/devtools-vite": "^0.6.0",
+        "ahooks": "^3.9.7",
+        "mqtt": "^5.15.1"
     }
 }

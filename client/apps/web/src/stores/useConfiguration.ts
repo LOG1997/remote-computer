@@ -6,6 +6,7 @@ interface ConfigurationStore {
     config: {
         host: string;
         port: string;
+        mqtt_port: string;
     } | null;
     setConfig: (info: ConfigurationStore['config']) => void;
     clearConfig: () => void;

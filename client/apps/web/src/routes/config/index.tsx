@@ -44,6 +44,13 @@ const formSchema = z.object({
         .regex(/^\d+$/, "端口必须是数字")
         .transform(Number) // 可选：转换为数字
         .refine((val) => val >= 1 && val <= 65535, { message: "端口范围必须在 1-65535 之间" }),
+    mqtt_port: z
+        .string()
+        .min(1, "端口不能为空")
+        .max(5, "端口号无效")
+        .regex(/^\d+$/, "端口必须是数字")
+        .transform(Number) // 可选：转换为数字
+        .refine((val) => val >= 1 && val <= 65535, { message: "端口范围必须在 1-65535 之间" }),
 })
 function Configuration() {
     const router = useRouter()
@@ -59,6 +66,7 @@ function Configuration() {
         defaultValues: {
             host: configData?.host || hostname,
             port: configData?.port.toString() || localPort,
+            mqtt_port: configData?.mqtt_port || '8889',
         },
         validators: {
             onSubmit: formSchema,
@@ -95,9 +103,11 @@ function Configuration() {
         setIsDialogOpen(false)
         const host = form.getFieldValue('host')
         const port = form.getFieldValue('port')
+        const mqtt_port = form.getFieldValue('mqtt_port')
         setConfig({
             host,
-            port
+            port,
+            mqtt_port,
         })
         // 路由跳转
         router.navigate({ to: '/dashboard', replace: true })
@@ -165,6 +175,31 @@ function Configuration() {
                                                 onChange={(e) => field.handleChange(e.target.value)}
                                                 aria-invalid={isInvalid}
                                                 placeholder="电脑监听的端口号"
+                                            // type='number'
+                                            />
+                                            {isInvalid && (
+                                                <FieldError errors={field.state.meta.errors} />
+                                            )}
+                                        </Field>
+                                    )
+                                }}
+                            />
+                            <form.Field
+                                name="mqtt_port"
+                                children={(field) => {
+                                    const isInvalid =
+                                        field.state.meta.isTouched && !field.state.meta.isValid
+                                    return (
+                                        <Field data-invalid={isInvalid}>
+                                            <FieldLabel htmlFor={field.name}>mqtt端口</FieldLabel>
+                                            <Input
+                                                id={field.name}
+                                                name={field.name}
+                                                value={field.state.value}
+                                                onBlur={field.handleBlur}
+                                                onChange={(e) => field.handleChange(e.target.value)}
+                                                aria-invalid={isInvalid}
+                                                placeholder="mqtt端口号"
                                             // type='number'
                                             />
                                             {isInvalid && (

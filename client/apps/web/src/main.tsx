@@ -1,6 +1,8 @@
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
+import { MqttProvider } from '@/components/mqtt/MqttContext'
 import { RouterProvider, createRouter, createHashHistory } from '@tanstack/react-router'
+
 import "@workspace/ui/globals.css"
 import { routeTree } from './routeTree.gen'
 const hashHistory = createHashHistory()
@@ -23,7 +25,9 @@ if (!rootElement.innerHTML) {
     const root = ReactDOM.createRoot(rootElement)
     root.render(
         <StrictMode>
-            <RouterProvider router={router} />
+            <MqttProvider>
+                <RouterProvider router={router} />
+            </MqttProvider>
         </StrictMode>
     )
 

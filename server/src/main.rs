@@ -1,6 +1,11 @@
 use axum::{Router, routing::post};
 use axum_server::tls_rustls::RustlsConfig;
+use tokio::task::JoinHandle;
 use tower_http::services::ServeDir; // 用于设置 Content-Type
+
+use rmqtt::{Result, context::ServerContext, net::Builder, server::MqttServer};
+use rustls::crypto::ring::default_provider;
+use simple_logger::SimpleLogger;
 
 mod common;
 use common::app::get_app_dir;
@@ -12,7 +17,52 @@ use api::handle::{get_device_status, get_system_info, reboot_handler, shutdown_h
 
 // 关机主函数
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<()> {
+    default_provider().install_default().unwrap();
+
+    SimpleLogger::new()
+        .with_level(log::LevelFilter::Info)
+        .init()?;
+
+    let scx = ServerContext::new().build().await;
+
+    let mqtt_handle: JoinHandle<Result<()>> = tokio::spawn(async move {
+        MqttServer::new(scx)
+            .listener(
+                Builder::new()
+                    .name("external/tcp")
+                    .laddr(([0, 0, 0, 0], 1883).into())
+                    .bind()?
+                    .tcp()?,
+            )
+            .listener(
+                Builder::new()
+                    .name("internal/tcp")
+                    .laddr(([0, 0, 0, 0], 11883).into())
+                    .bind()?
+                    .tcp()?,
+            )
+            // .listener(
+            //     Builder::new()
+            //         .name("external/tls")
+            //         .laddr(([0, 0, 0, 0], 8883).into())
+            //         .tls_key(Some("./key.pem"))
+            //         .tls_cert(Some("./cert.pem"))
+            //         .bind()?
+            //         .tls()?,
+            // )
+            .listener(
+                Builder::new()
+                    .name("external/ws")
+                    .laddr(([0, 0, 0, 0], 8889).into())
+                    .bind()?
+                    .ws()?,
+            )
+            .build()
+            .run()
+            .await
+    });
+
     let is_dev = cfg!(debug_assertions);
     let app_dir = get_app_dir();
     let app_config = AppConfig::from_file(AppConfig::default_path(&app_dir).to_str().unwrap())
@@ -54,17 +104,20 @@ async fn main() {
         // 允许跨域 → 网页必须
         .layer(tower_http::cors::CorsLayer::permissive());
     // 启动服务
-    if is_https {
+    let http_result = if is_https {
         let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
         println!("启动服务: https://{}", addr);
         axum_server::bind_rustls(addr, tls_config)
             .serve(app.into_make_service())
             .await
-            .unwrap();
     } else {
         let addr = std::net::SocketAddr::from(([0, 0, 0, 0], port));
         println!("启动服务: http://{}", addr);
         let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-        axum::serve(listener, app).await.unwrap();
-    }
+        axum::serve(listener, app).await
+    };
+    mqtt_handle.abort(); // 或者根据业务需求处理
+
+    http_result.map_err(|e| e.into())
+    // Ok(())
 }
