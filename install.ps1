@@ -4,14 +4,14 @@
 .SYNOPSIS
     安装 ShutdownRemote 应用并配置开机自启。
 .DESCRIPTION
-    1. 将 ./dist 目录复制到用户主目录下的 shutdown-remote 文件夹。
+    1. 将 ./dist 目录复制到用户主目录下的 remote-computer 文件夹。
     2. 创建计划任务，在系统启动时运行 shutdown-auto.exe。
 #>
 
 # 定义变量
 $SourceDir = Join-Path $PSScriptRoot "/"
-$TargetDir = Join-Path $env:USERPROFILE "shutdown-remote"
-$ExeName = "shutdown-remote.exe"
+$TargetDir = Join-Path $env:USERPROFILE "remote-computer"
+$ExeName = "remote-computer.exe"
 $TaskName = "ShutdownRemoteAutoStart"
 $TaskDescription = "Automatically start ShutdownRemote agent on system startup."
 
@@ -87,7 +87,7 @@ try {
         New-Item -ItemType Directory -Path $TargetDir -Force | Out-Null
     }
     
-    Copy-Item -Path "$SourceDir\*" -Destination $TargetDir -Recurse -Force -Exclude "shutdown-remote.zip"
+    Copy-Item -Path "$SourceDir\*" -Destination $TargetDir -Recurse -Force -Exclude "remote-computer.zip"
     
     Write-Host "文件复制完成。" -ForegroundColor Green
 }

@@ -46,18 +46,18 @@ Write-Host "[4/4] 复制文件..."
 
 # 复制 Rust 可执行文件
 # 注意：Windows 下 Rust release 产物通常是 .exe
-$exeSource = "server/target/release/shutdown-remote.exe"
+$exeSource = "server/target/release/remote-computer.exe"
 if (Test-Path $exeSource) {
     Copy-Item -Path $exeSource -Destination "./dist/"
 }
 else {
     # 尝试不带 .exe 的情况（虽然少见，但以防万一）
-    $exeSourceFallback = "server/target/release/shutdown-remote"
+    $exeSourceFallback = "server/target/release/remote-computer"
     if (Test-Path $exeSourceFallback) {
         Copy-Item -Path $exeSourceFallback -Destination "./dist/"
     }
     else {
-        Write-Error "未找到 Rust 编译产物: shutdown-remote.exe"
+        Write-Error "未找到 Rust 编译产物: remote-computer.exe"
         exit 1
     }
 }
@@ -75,8 +75,8 @@ Copy-Item -Path "client/apps/web/dist/*" -Destination "./dist/web/" -Recurse
 # 复制安装脚本
 Copy-Item -Path "install.ps1" -Destination "./dist/"
 
-# 压缩包，把dist内的文件夹和文件压缩成shutdown-remote.zip，放在dist目录中，打包最小化
-$zipFile = "./dist/shutdown-remote.zip"
+# 压缩包，把dist内的文件夹和文件压缩成remote-computer.zip，放在dist目录中，打包最小化
+$zipFile = "./dist/remote-computer.zip"
 Compress-Archive -Path "./dist/*" -DestinationPath $zipFile
 
 Write-Host ""

@@ -1,24 +1,24 @@
 [package]
-name = "shutdown-remote"
+name = "remote-computer"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-warp = "0.4.2"
+warp = "0.4.3"
 axum = "0.8.9"
-tower-http = { version = "0.6.8", features = ["cors", "fs"] }
+tower-http = { version = "0.6.10", features = ["cors", "fs"] }
 mio = "1.2.0"
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-tokio = { version = "1.52.1", features = ["full"] }
+tokio = { version = "1.52.3", features = ["full"] }
 tokio-rustls = "0.26.4"
 rustls-pemfile = "2.2.0"
-rustls = "0.23.38"
+rustls = "0.23.40"
 axum-server = { version = "0.8.0", features = ["tls-rustls"] }
 hyper = "1.9.0"
 http = "1.4.0"
 toml = "1.1.2"
-sysinfo = "0.38.4"
+sysinfo = "0.39.0"
 chrono = "0.4.44"
 rumqttc = "0.25.1"
 open = "5.3.4"

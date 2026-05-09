@@ -17,12 +17,12 @@ pub fn generate_computer_online_status(
     let online_payload = json!({
         "name": "在线状态",
         "unique_id": format!("{}_status_online", mqtt_config.client_id),
-        "state_topic": format!("{}/info/status_online", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/status_online", mqtt_config.client_id),
         "value_template": "{{ value_json.state }}",
         "payload_on": "ON",
         "payload_off": "OFF",
         "device_class": "connectivity",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -54,9 +54,9 @@ pub fn generate_computer_cpu_info(
     let cpu_brand_payload = json!({
         "name": "CPU",
         "unique_id": format!("{}_cpu_brand", mqtt_config.client_id),
-        "state_topic": format!("{}/info/cpu", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/cpu", mqtt_config.client_id),
         "value_template": "{{ value_json.brand }}",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -75,9 +75,9 @@ pub fn generate_computer_cpu_info(
     let cpu_physical_core_count_payload = json!({
         "name": "核心数",
         "unique_id": format!("{}_cpu_physical_core_count", mqtt_config.client_id),
-        "state_topic": format!("{}/info/cpu", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/cpu", mqtt_config.client_id),
         "value_template": "{{ value_json.physical_core_count }}",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -96,9 +96,9 @@ pub fn generate_computer_cpu_info(
     let cpu_total_core_count_payload = json!({
         "name": "线程数",
         "unique_id": format!("{}_cpu_total_core_count", mqtt_config.client_id),
-        "state_topic": format!("{}/info/cpu", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/cpu", mqtt_config.client_id),
         "value_template": "{{ value_json.total_core_count }}",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -117,10 +117,10 @@ pub fn generate_computer_cpu_info(
     let cpu_frequency_payload = json!({
         "name": "频率",
         "unique_id": format!("{}_cpu_frequency", mqtt_config.client_id),
-        "state_topic": format!("{}/info/cpu", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/cpu", mqtt_config.client_id),
         "value_template": "{{ (value_json.frequency/ 1000) | round(2) }}",
         "unit_of_measurement": "GHz",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -139,10 +139,10 @@ pub fn generate_computer_cpu_info(
     let cpu_usage_payload = json!({
         "name": "CPU使用率",
         "unique_id": format!("{}_cpu_usage", mqtt_config.client_id),
-        "state_topic": format!("{}/info/cpu", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/cpu", mqtt_config.client_id),
         "value_template": "{{ value_json.usage | round(1) }}",
         "unit_of_measurement": "%",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -169,10 +169,10 @@ pub fn generate_computer_memory_info(
     let memory_available_memory_payload = json!({
         "name": "未使用内存",
         "unique_id": format!("{}_memory_available_memory", mqtt_config.client_id),
-        "state_topic": format!("{}/info/memory", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/memory", mqtt_config.client_id),
         "value_template": "{{ (value_json.available_memory/1073741824) | round(1) }}",
         "unit_of_measurement": "GB",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -190,7 +190,7 @@ pub fn generate_computer_memory_info(
     let memory_used_memory_payload = json!({
         "name": "已使用内存",
         "unique_id": format!("{}_memory_used_memory", mqtt_config.client_id),
-        "state_topic": format!("{}/info/memory", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/memory", mqtt_config.client_id),
         "value_template": "{{ (value_json.used_memory/1073741824)|round(1) }}",
         "unit_of_measurement": "GB",
         "expire_after": mqtt_config.expire_time,
@@ -207,10 +207,10 @@ pub fn generate_computer_memory_info(
     let memory_usage_payload = json!({
         "name": "内存使用率",
         "unique_id": format!("{}_memory_usage", mqtt_config.client_id),
-        "state_topic": format!("{}/info/memory", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/memory", mqtt_config.client_id),
         "value_template": "{{ value_json.usage }}",
         "unit_of_measurement": "%",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -237,9 +237,9 @@ pub fn generate_computer_os_info(
     let os_host_name_payload = json!({
         "name": "电脑名称",
         "unique_id": format!("{}_os_host_name", mqtt_config.client_id),
-        "state_topic": format!("{}/info/os", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/os", mqtt_config.client_id),
         "value_template": "{{ value_json.host_name }}",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -258,9 +258,9 @@ pub fn generate_computer_os_info(
     let os_name_payload = json!({
         "name": "系统名称",
         "unique_id": format!("{}_os_name", mqtt_config.client_id),
-        "state_topic": format!("{}/info/os", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/os", mqtt_config.client_id),
         "value_template": "{{ value_json.name }}",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -279,9 +279,9 @@ pub fn generate_computer_os_info(
     let os_os_version_payload = json!({
         "name": "系统版本",
         "unique_id": format!("{}_os_os_version", mqtt_config.client_id),
-        "state_topic": format!("{}/info/os", mqtt_config.client_id),
+        "state_topic": format!("ha_state/{}/info/os", mqtt_config.client_id),
         "value_template": "{{ value_json.os_version }}",
-        "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+        "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
         // 在线/离线 状态值，设备发送给ha的消息
         "payload_available": "ON",
         "payload_not_available": "OFF",
@@ -311,8 +311,8 @@ pub fn generate_control_online_status_payload(
             "name": "电源",
             "unique_id": format!("{}_online_switch", mqtt_config.client_id),
             "device_class": "switch",
-            "state_topic": format!("{}/control/status_online", mqtt_config.client_id),
-            "command_topic":format!("{}/control/set_status_online", mqtt_config.client_id),
+            "state_topic": format!("ha_state/{}/control/status_online", mqtt_config.client_id),
+            "command_topic":format!("ha_control{}/control/set_status_online", mqtt_config.client_id),
 
             "value_template": "{{ value_json.state }}",
             // ha发送的控制消息状态值
@@ -323,7 +323,7 @@ pub fn generate_control_online_status_payload(
             "state_off": "OFF",
 
 
-            "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+            "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
             // 在线/离线 状态值，设备发送给ha的消息
             "payload_available": "ON",
             "payload_not_available": "OFF",
@@ -351,11 +351,11 @@ pub fn generate_launch_app_payload(
             let payload = json!({
             "name": app_name,
             "unique_id": format!("{}_launch_app_{}", mqtt_config.client_id,app_key),
-            "command_topic":format!("{}/control/launch_app", mqtt_config.client_id),
+            "command_topic":format!("ha_control/{}/control/launch_app", mqtt_config.client_id),
             // ha发送的控制消息状态值
             "payload_press": app_key,
 
-            "availability_topic": format!("{}/common/availability_status_online", mqtt_config.client_id),
+            "availability_topic": format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id),
             // 在线/离线 状态值，设备发送给ha的消息
             "payload_available": "ON",
             "payload_not_available": "OFF",

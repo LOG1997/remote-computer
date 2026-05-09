@@ -3,9 +3,9 @@
 # 定义变量
 SOURCE_DIR="./"
 # 建议安装在系统共享目录，这样所有用户都能访问，且符合 Linux 规范
-# 如果必须安装在当前用户主目录，请改为: TARGET_DIR="$HOME/shutdown-remote"
-TARGET_DIR="/usr/local/share/shutdown-remote"
-SERVICE_NAME="shutdown-remote"
+# 如果必须安装在当前用户主目录，请改为: TARGET_DIR="$HOME/remote-computer"
+TARGET_DIR="/usr/local/share/remote-computer"
+SERVICE_NAME="remote-computer"
 SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 # 检查源目录是否存在

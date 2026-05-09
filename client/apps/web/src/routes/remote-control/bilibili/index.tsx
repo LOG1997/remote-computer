@@ -11,10 +11,10 @@ export const Route = createFileRoute('/remote-control/bilibili/')({
 })
 
 function RouteComponent() {
-    const { subscribe, publish, messages, isConnected } = useMqtt();
-    const subscribeTopic = () => {
-        subscribe('tv/remote-control/computer/bilibili');
-    }
+    const { /* subscribe, */ publish, messages, isConnected } = useMqtt();
+    // const subscribeTopic = () => {
+    //     subscribe('tv/remote-control/computer/bilibili');
+    // }
     const publishTopic = (operation: RemoteControlType) => {
         publish('tv/remote-control/computer/bilibili', {
             type: operation,

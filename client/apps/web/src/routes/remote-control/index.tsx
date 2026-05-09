@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { menus } from './-config'
 import { useNavigate } from '@tanstack/react-router'
-import { useFullscreen } from 'ahooks';
-import { useRef, useEffect } from 'react'
+// import { useFullscreen } from 'ahooks';
+// import { useRef, useEffect } from 'react'
 
 
 export const Route = createFileRoute('/remote-control/')({
@@ -12,9 +12,9 @@ export const Route = createFileRoute('/remote-control/')({
 function RouteComponent() {
     const navigate = useNavigate()
     // const ref = useRef<HTMLDivElement | null>(null)
-    const rootRef = useRef(document.documentElement);
+    // const rootRef = useRef(document.documentElement);
 
-    const [isFullscreen, { enterFullscreen, exitFullscreen, toggleFullscreen }] = useFullscreen(rootRef);
+    // const [isFullscreen, { enterFullscreen, exitFullscreen, toggleFullscreen }] = useFullscreen(rootRef);
     function goRoute(route: string) {
         console.log('goRoute', route)
         // TODO:全屏展示

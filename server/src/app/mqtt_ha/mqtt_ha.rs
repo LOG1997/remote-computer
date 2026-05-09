@@ -15,9 +15,15 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) {
         mqtt_config.host.clone(),      // 本地 MQTT 服务器地址
         mqtt_config.port,              // 默认端口
     );
+    if let (Some(username), Some(password)) = (&mqtt_config.username, &mqtt_config.password) {
+        if !username.is_empty() {
+            println!("正在配置 MQTT 认证信息...");
+            mqtt_options.set_credentials(username, password);
+        }
+    }
     mqtt_options.set_keep_alive(Duration::from_secs(mqtt_config.interval));
     let will_topic = format!(
-        "{}/common/availability_status_online",
+        "ha_state/{}/common/availability_status_online",
         mqtt_config.client_id
     );
     // ====================遗嘱消息===================
@@ -39,7 +45,6 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) {
     // ====================== 2. 创建客户端 ======================
     let (client, mut event_loop) = AsyncClient::new(mqtt_options, 10);
     // 等待连接建立
-    println!("正在连接 MQTT Broker...");
     let connect_timeout = Duration::from_secs(mqtt_config.expire_time); // 设置一个合理的超时时间
     let start_time = std::time::Instant::now();
     let mut connected = false;
@@ -67,8 +72,11 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) {
         return;
     }
     // 异步线程处理 MQTT 事件（必须运行）
-    let control_online_topic = format!("{}/control/set_status_online", mqtt_config.client_id);
-    let launch_app_topic = format!("{}/control/launch_app", mqtt_config.client_id);
+    let control_online_topic = format!(
+        "ha_control/{}/control/set_status_online",
+        mqtt_config.client_id
+    );
+    let launch_app_topic = format!("ha_control/{}/control/launch_app", mqtt_config.client_id);
     tokio::spawn(async move {
         loop {
             match event_loop.poll().await {
@@ -100,9 +108,12 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) {
 
     // ====================== 3. 订阅主题 ======================
     // NOTE:控制电脑的消息在这里订阅
-    let launch_apps_topics = Vec::from([format!("{}/control/launch_app", mqtt_config.client_id)]);
+    let launch_apps_topics = Vec::from([format!(
+        "ha_control/{}/control/launch_app",
+        mqtt_config.client_id
+    )]);
     let control_computer_topics = Vec::from([format!(
-        "{}/control/set_status_online",
+        "ha_control/{}/control/set_status_online",
         mqtt_config.client_id
     )]);
 
@@ -176,12 +187,12 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) {
 
                 // let availability_status_online = "online".to_string();
                 let all_info = serde_json::json!({
-                    format!("{}/info/os", mqtt_config.client_id): os_info,
-                    format!("{}/info/cpu", mqtt_config.client_id): cpu_info,
-                    format!("{}/info/memory", mqtt_config.client_id): memory_info,
-                    format!("{}/info/status_online", mqtt_config.client_id): online_status,
-                    format!("{}/control/status_online", mqtt_config.client_id): control_online_status,
-                    format!("{}/common/availability_status_online", mqtt_config.client_id): control_online_status,
+                    format!("ha_state/{}/info/os", mqtt_config.client_id): os_info,
+                    format!("ha_state/{}/info/cpu", mqtt_config.client_id): cpu_info,
+                    format!("ha_state/{}/info/memory", mqtt_config.client_id): memory_info,
+                    format!("ha_state/{}/info/status_online", mqtt_config.client_id): online_status,
+                    format!("ha_state/{}/control/status_online", mqtt_config.client_id): control_online_status,
+                    format!("ha_state/{}/common/availability_status_online", mqtt_config.client_id): control_online_status,
                 });
                 // 遍历发送
                 for (topic, payload) in all_info.as_object().unwrap() {
