@@ -16,133 +16,89 @@ import { Route as ConfigIndexRouteImport } from './routes/config/index'
 import { Route as RemoteControlBilibiliIndexRouteImport } from './routes/remote-control/bilibili/index'
 
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RemoteControlIndexRoute = RemoteControlIndexRouteImport.update({
-  id: '/remote-control/',
-  path: '/remote-control/',
-  getParentRoute: () => rootRouteImport,
+    id: '/',
+    path: '/',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
+    id: '/dashboard/',
+    path: '/dashboard/',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const ConfigIndexRoute = ConfigIndexRouteImport.update({
-  id: '/config/',
-  path: '/config/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RemoteControlBilibiliIndexRoute =
-  RemoteControlBilibiliIndexRouteImport.update({
-    id: '/remote-control/bilibili/',
-    path: '/remote-control/bilibili/',
+    id: '/config/',
+    path: '/config/',
     getParentRoute: () => rootRouteImport,
-  } as any)
+} as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/config/': typeof ConfigIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/remote-control/': typeof RemoteControlIndexRoute
-  '/remote-control/bilibili/': typeof RemoteControlBilibiliIndexRoute
+    '/': typeof IndexRoute
+    '/config/': typeof ConfigIndexRoute
+    '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/config': typeof ConfigIndexRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/remote-control': typeof RemoteControlIndexRoute
-  '/remote-control/bilibili': typeof RemoteControlBilibiliIndexRoute
+    '/': typeof IndexRoute
+    '/config': typeof ConfigIndexRoute
+    '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/config/': typeof ConfigIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/remote-control/': typeof RemoteControlIndexRoute
-  '/remote-control/bilibili/': typeof RemoteControlBilibiliIndexRoute
+    __root__: typeof rootRouteImport
+    '/': typeof IndexRoute
+    '/config/': typeof ConfigIndexRoute
+    '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/config/'
-    | '/dashboard/'
-    | '/remote-control/'
-    | '/remote-control/bilibili/'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/config'
-    | '/dashboard'
-    | '/remote-control'
-    | '/remote-control/bilibili'
-  id:
-    | '__root__'
-    | '/'
-    | '/config/'
-    | '/dashboard/'
-    | '/remote-control/'
-    | '/remote-control/bilibili/'
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath
+    fullPaths: '/' | '/config/' | '/dashboard/'
+    fileRoutesByTo: FileRoutesByTo
+    to: '/' | '/config' | '/dashboard'
+    id: '__root__' | '/' | '/config/' | '/dashboard/'
+    fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  ConfigIndexRoute: typeof ConfigIndexRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  RemoteControlIndexRoute: typeof RemoteControlIndexRoute
-  RemoteControlBilibiliIndexRoute: typeof RemoteControlBilibiliIndexRoute
+    IndexRoute: typeof IndexRoute
+    ConfigIndexRoute: typeof ConfigIndexRoute
+    DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+    interface FileRoutesByPath {
+        '/': {
+            id: '/'
+            path: '/'
+            fullPath: '/'
+            preLoaderRoute: typeof IndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/dashboard/': {
+            id: '/dashboard/'
+            path: '/dashboard'
+            fullPath: '/dashboard/'
+            preLoaderRoute: typeof DashboardIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/shutdown_control/config/': {
+            id: '/shutdown_control/config/'
+            path: '/shutdown_control/config'
+            fullPath: '/shutdown_control/config/'
+            preLoaderRoute: typeof Shutdown_controlConfigIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/remote-control/bilibili/': {
+            id: '/remote-control/bilibili/'
+            path: '/remote-control/bilibili'
+            fullPath: '/remote-control/bilibili/'
+            preLoaderRoute: typeof RemoteControlBilibiliIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
     }
-    '/remote-control/': {
-      id: '/remote-control/'
-      path: '/remote-control'
-      fullPath: '/remote-control/'
-      preLoaderRoute: typeof RemoteControlIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/config/': {
-      id: '/config/'
-      path: '/config'
-      fullPath: '/config/'
-      preLoaderRoute: typeof ConfigIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/remote-control/bilibili/': {
-      id: '/remote-control/bilibili/'
-      path: '/remote-control/bilibili'
-      fullPath: '/remote-control/bilibili/'
-      preLoaderRoute: typeof RemoteControlBilibiliIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  ConfigIndexRoute: ConfigIndexRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-  RemoteControlIndexRoute: RemoteControlIndexRoute,
-  RemoteControlBilibiliIndexRoute: RemoteControlBilibiliIndexRoute,
+    IndexRoute: IndexRoute,
+    ConfigIndexRoute: ConfigIndexRoute,
+    DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+    ._addFileChildren(rootRouteChildren)
+    ._addFileTypes<FileRouteTypes>()

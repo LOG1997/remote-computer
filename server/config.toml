@@ -21,4 +21,4 @@ launch_app = { "wechat" = "微信", "steam" = "Steam", "tailscale" = "Tailscale"
 
 
 [security]
-shutdown_key = "xinglugu"
+shutdown_key = "yes"

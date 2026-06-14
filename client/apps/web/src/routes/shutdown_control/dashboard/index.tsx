@@ -9,12 +9,12 @@ import MemoryCard from "./components/MemoryCard/-index"
 import StatusCard from "./components/StatusCard/-index"
 import { useEffect } from 'react'
 
-export const Route = createFileRoute('/dashboard/')({
+export const Route = createFileRoute('/shutdown_control/dashboard/')({
     component: Dashboard,
     loader: async () => {
         return {
             meta: {
-                back: '/config',
+                back: '/shutdown_control/config',
                 backName: '去配置',
             },
         }
