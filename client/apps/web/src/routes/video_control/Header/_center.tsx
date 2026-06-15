@@ -6,10 +6,10 @@ import {
     NavigationMenuLink,
     NavigationMenuList,
     NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu"
+} from "@workspace/ui/components/navigation-menu"
 import { usePlatform } from '@/stores'
 import { PlatformList } from '@/constant/platform'
-export function PlatformSwitch() {
+export function CenterHeader() {
     const configData = usePlatform((state) => state.platformInfo)
     const setConfig = usePlatform((state) => state.setConfig)
 

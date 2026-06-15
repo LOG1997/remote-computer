@@ -8,8 +8,8 @@ import {
     NavigationMenuTrigger,
 } from "@workspace/ui/components/navigation-menu"
 import { globalActions } from '@/constant/globalActions'
-import { useMqtt } from '@/components/MqttProvider'
-export function GlobalAction() {
+import { useMqtt } from '@/components/mqtt/MqttContext'
+export function RightHeader() {
     const mqttClient = useMqtt()
     const handleSelect = (item: any) => {
         mqttClient.publish('tv-web/log1997/receive', {
@@ -23,7 +23,7 @@ export function GlobalAction() {
                 <NavigationMenuList>
                     <NavigationMenuItem>
                         <NavigationMenuTrigger className="[&_svg]:hidden">
-                            <Button variant="ghost">...</Button>
+                            <span>...</span>
                         </NavigationMenuTrigger>
                         <NavigationMenuContent>
                             {

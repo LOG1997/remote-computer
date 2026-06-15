@@ -100,7 +100,7 @@ function Configuration() {
             port
         })
         // 路由跳转
-        router.navigate({ to: '/dashboard', replace: true })
+        router.navigate({ to: '/shutdown_control/dashboard', replace: true })
     }
     return (
         <div className='flex justify-center'>
