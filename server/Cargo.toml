@@ -13,7 +13,7 @@ serde_json = "1.0.149"
 tokio = { version = "1.52.3", features = ["full"] }
 tokio-rustls = "0.26.4"
 rustls-pemfile = "2.2.0"
-rustls = "0.23.40"
+rustls = { version = "0.23.4", features = ["ring"] }
 axum-server = { version = "0.8.0", features = ["tls-rustls"] }
 hyper = "1.9.0"
 http = "1.4.0"
@@ -26,3 +26,7 @@ smol = "2.0.2"
 rmqtt = { version = "0.21.0", features = ["ws"] }
 simple_logger = "5.2.0"
 log = "0.4.32"
+volumecontrol = "0.1.4"
+anyhow = "1.0.102"
+cpvc = "0.6.0"
+alsa-sys = "0.5.0"

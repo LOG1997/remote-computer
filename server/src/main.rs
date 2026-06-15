@@ -12,9 +12,14 @@ use app::web_server::start_web_server;
 use tokio::signal;
 use tokio::task::JoinHandle;
 
+use anyhow::{Ok, Result};
+
 // 关机主函数
 #[tokio::main]
 async fn main() {
+    rustls::crypto::ring::default_provider()
+        .install_default()
+        .expect("Failed to install rustls crypto provider");
     let app_dir = get_app_dir();
     let app_config = AppConfig::from_file(AppConfig::default_path(&app_dir).to_str().unwrap())
         .expect("Failed to load config file");
@@ -69,4 +74,5 @@ async fn main() {
     }
 
     println!("程序已退出。");
+    // Ok(())
 }
