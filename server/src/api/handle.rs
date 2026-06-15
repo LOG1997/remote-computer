@@ -76,6 +76,7 @@ pub async fn reboot_handler(
     )
 }
 
+// 该设备是否在线
 pub async fn get_device_status() -> (StatusCode, Json<serde_json::Value>) {
     return (
         StatusCode::OK,
@@ -88,6 +89,7 @@ pub async fn get_device_status() -> (StatusCode, Json<serde_json::Value>) {
     );
 }
 
+// 获取系统信息
 pub async fn get_system_info() -> (StatusCode, Json<serde_json::Value>) {
     let system_info = get_system_info_json();
     let data_json = match system_info {
