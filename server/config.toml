@@ -5,7 +5,7 @@ port = 52011
 host = "127.0.0.1"
 
 [mqtt]
-enable = true
+enable = false
 # mqtt配置，适配HomeAssistant
 host = "127.0.0.1"
 port = 1883

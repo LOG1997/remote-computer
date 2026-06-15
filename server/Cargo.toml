@@ -23,3 +23,6 @@ chrono = "0.4.44"
 rumqttc = "0.25.1"
 open = "5.3.4"
 smol = "2.0.2"
+rmqtt = { version = "0.21.0", features = ["ws"] }
+simple_logger = "5.2.0"
+log = "0.4.32"
