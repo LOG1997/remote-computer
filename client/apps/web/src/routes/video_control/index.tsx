@@ -9,50 +9,53 @@ import {
     ItemTitle,
 } from "@workspace/ui/components/item"
 import { usePlatform } from '@/stores'
-import { CenterHeader } from './Header/_center'
 import { RightHeader } from './Header/_right'
+import { useEffect } from 'react'
 
 export const Route = createFileRoute('/video_control/')({
     loader: async () => {
         return {
             header: {
-                center: <CenterHeader />,
                 right: <RightHeader />,
             }
         }
     },
-    component: function RouteComponent() {
-        const navigate = useNavigate()
-        const configData = usePlatform((state) => state.platformInfo)
-        const setConfig = usePlatform((state) => state.setConfig)
-        const handleSelectPlatform = (platform: any) => {
-            setConfig({
-                current: platform,
-            })
-            navigate({ to: platform.path })
-        }
-        return (<div>
-            <ItemGroup className="grid grid-cols-3 gap-4">
-                {PlatformList.map((platform) => (
-                    <Item key={platform.name} variant="outline" onClick={() => { handleSelectPlatform(platform) }}>
-                        <ItemHeader>
-                            <div className="w-full">
-                                {
-                                    platform.icon && (
-                                        platform.icon
-                                    )
-                                }
-                            </div>
-                        </ItemHeader>
-                        <ItemContent>
-                            <ItemTitle>{platform.name}</ItemTitle>
-                            <ItemDescription>{platform.description}</ItemDescription>
-                        </ItemContent>
-                    </Item>
-                ))}
-            </ItemGroup>
-        </div >)
-    },
+    component: RouteComponent
 })
 
-
+function RouteComponent() {
+    const navigate = useNavigate()
+    const setPlatformConfig = usePlatform((state) => state.setConfig)
+    const handleSelectPlatform = (platform: any) => {
+        setPlatformConfig({
+            current: platform,
+        })
+        navigate({ to: platform.path })
+    }
+    useEffect(() => {
+        setPlatformConfig({
+            current: null,
+        })
+    }, [])
+    return (<div>
+        <ItemGroup className="grid grid-cols-3 gap-4">
+            {PlatformList.map((platform) => (
+                <Item key={platform.name} variant="outline" onClick={() => { handleSelectPlatform(platform) }}>
+                    <ItemHeader>
+                        <div className="w-full">
+                            {
+                                platform.icon && (
+                                    platform.icon
+                                )
+                            }
+                        </div>
+                    </ItemHeader>
+                    <ItemContent>
+                        <ItemTitle>{platform.name}</ItemTitle>
+                        <ItemDescription>{platform.description}</ItemDescription>
+                    </ItemContent>
+                </Item>
+            ))}
+        </ItemGroup>
+    </div >)
+}

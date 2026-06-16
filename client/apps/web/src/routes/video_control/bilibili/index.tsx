@@ -1,9 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/button'
 import { useMqtt } from '@/components/mqtt/MqttContext'
-import { Field } from "@workspace/ui/components/field"
-import { Input } from "@workspace/ui/components/input"
-import { useState } from "react"
 import { DirectionPart } from './parts/_Direction'
 import { OtherActionGroup } from './parts/_OtherActionGroup'
 import { CenterHeader } from '../Header/_center'
@@ -19,15 +16,8 @@ export const Route = createFileRoute('/video_control/bilibili/')({
         }
     },
     component: function RouteComponent() {
-        const [searchValue, setSearchValue] = useState('')
         const mqttClient = useMqtt()
-        const handleSearch = () => {
-            mqttClient.publish('tv-web/log1997/receive', {
-                action: 'bilibili',
-                data: 'search',
-                payload: searchValue
-            })
-        }
+
         const handleNavigate = (direction: 'back' | 'forward') => {
             mqttClient.publish('tv-web/log1997/receive', {
                 action: 'navigate',

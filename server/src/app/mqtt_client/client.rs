@@ -11,6 +11,10 @@ struct ControlMessage {
     topic: String,
     payload: String,
 }
+struct MqttPublishRequest {
+    topic: String,
+    payload: String,
+}
 
 pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
     // 1. 配置 MQTT 连接选项
@@ -28,7 +32,9 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
     // 2. 创建 AsyncClient 和事件接收器
     let (client, mut event_loop) = AsyncClient::new(mqtt_options, 10);
     let client_clone = client.clone();
-
+    // 【新增】创建用于从控制线程向主任务发送“发布请求”的通道
+    let (pub_tx, mut pub_rx) = mpsc::channel::<MqttPublishRequest>(100);
+    let pub_tx_clone = pub_tx.clone(); // 克隆一份给控制线程使用
     // 3. 创建通道用于发送控制指令
     let (tx, mut rx) = mpsc::channel::<ControlMessage>(100);
     let tx_clone = tx.clone();
@@ -41,7 +47,7 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
                 while let Some(msg) = rx.blocking_recv() {
                     let payload = serde_json::from_str::<serde_json::Value>(&msg.payload)
                         .expect("无法解析 JSON");
-
+                    println!("topic and payload:{}_{}", msg.topic, msg.payload);
                     if msg.topic == "tv-web/control/volume" {
                         if payload["mute"].is_string() && payload["mute"] == "switch" {
                             let current_mute = volume_control.get_mute().unwrap();
@@ -58,6 +64,21 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
                                 log::info!("处理音量控制: {}", msg.payload);
                             }
                         }
+                    } else if msg.topic == "tv-web/volume/state/receive" {
+                        let current_volume = volume_control.get_volume().unwrap();
+                        let current_mute = volume_control.get_mute().unwrap();
+                        let state =
+                            serde_json::json!({ "volume": current_volume, "mute": current_mute });
+                        // push to mqtt
+                        if pub_tx_clone
+                            .blocking_send(MqttPublishRequest {
+                                topic: "tv-web/volume/state/send".to_string(),
+                                payload: state.to_string(),
+                            })
+                            .is_err()
+                        {
+                            log::error!("无法将状态推送到 MQTT");
+                        };
                     } else if msg.topic == "tv-web/control/launch_app" {
                         if payload["app_name"].is_string() {
                             let app_name = payload["app_name"].as_str().unwrap();
@@ -81,27 +102,39 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
     // 5. 启动 MQTT 事件循环任务 (只负责接收和转发，不涉及非 Send 对象)
     tokio::spawn(async move {
         loop {
-            match event_loop.poll().await {
-                Ok(notification) => {
-                    if let Event::Incoming(Packet::Publish(p)) = notification {
-                        let topic = p.topic.clone();
-                        let payload = String::from_utf8_lossy(&p.payload).to_string();
+            tokio::select! {
+                // 1. 监听 MQTT 网络事件 (接收消息)
+                notification = event_loop.poll() => {
+                    match notification {
+                        Ok(Event::Incoming(Packet::Publish(p))) => {
+                            let topic = p.topic.clone();
+                            let payload = String::from_utf8_lossy(&p.payload).to_string();
 
-                        // 发送控制消息到处理线程
-                        if tx_clone
-                            .send(ControlMessage { topic, payload })
-                            .await
-                            .is_err()
-                        {
-                            log::error!("控制通道已关闭");
+                            if tx_clone.send(ControlMessage { topic, payload }).await.is_err() {
+                                log::error!("控制通道已关闭");
+                                break;
+                            }
+                        }
+                        Ok(_) => {} // 忽略其他事件 (如 Connect, SubAck 等)
+                        Err(e) => {
+                            log::error!("MQTT 事件循环错误: {:?}", e);
                             break;
                         }
                     }
+                },
+
+                // 2. 监听来自控制线程的发送请求
+                Some(req) = pub_rx.recv() => {
+                    log::info!("正在发送 MQTT 消息到主题: {}", req.topic);
+                    if let Err(e) = client_clone.publish(&req.topic, QoS::AtLeastOnce, false, req.payload).await {
+                        log::error!("发布 MQTT 消息失败: {:?}", e);
+                    } else {
+                        log::info!("MQTT 消息发送成功");
+                    }
                 }
-                Err(e) => {
-                    log::error!("MQTT 事件循环错误: {:?}", e);
-                    break;
-                }
+
+                // 如果所有通道都关闭了，退出循环
+                else => break,
             }
         }
     });
@@ -111,6 +144,8 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
     // 6. 订阅主题
     let topics = vec![
         SubscribeFilter::new("tv-web/control/volume".to_string(), QoS::AtLeastOnce),
+        SubscribeFilter::new("tv-web/volume/state/receive".to_string(), QoS::AtLeastOnce),
+        SubscribeFilter::new("tv-web/volume/state/send".to_string(), QoS::AtLeastOnce),
         SubscribeFilter::new("tv-web/control/launch_app".to_string(), QoS::AtMostOnce),
     ];
 
