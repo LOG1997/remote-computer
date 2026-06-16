@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import mqtt from 'mqtt';
 import type { MqttClient } from 'mqtt'
@@ -21,13 +21,14 @@ export interface MqttConfig {
     password?: string;
     topicName: string;
 }
-
+export type MqttMessageHandler = (msg: MqttMessage) => void;
 interface MqttContextType {
     client: MqttClient | null;
     messages: MqttMessage[];
     isConnected: boolean;
     subscribe: (topic: string) => void;
     publish: (topic: string, message: any) => void;
+    onMessage: (handler: MqttMessageHandler) => () => void;
 }
 
 const MqttContext = createContext<MqttContextType | undefined>(undefined);
@@ -37,6 +38,7 @@ export function MqttProvider({ children }: { children: ReactNode }) {
     const [messages, setMessages] = useState<MqttMessage[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
+    const handlersRef = useRef<Set<MqttMessageHandler>>(new Set());
     const configData = useMqttConfig((state) => state.mqttConfig)
     const { protocol } = window.location
     // 生成连接地址
@@ -82,6 +84,13 @@ export function MqttProvider({ children }: { children: ReactNode }) {
                 time: new Date().toLocaleString(),
             };
             setMessages(prev => [...prev, msg]);
+            handlersRef.current.forEach(handler => {
+                try {
+                    handler(msg);
+                } catch (error) {
+                    console.error('MQTT 消息回调执行错误:', error);
+                }
+            });
         });
 
         // 错误/断开
@@ -109,7 +118,14 @@ export function MqttProvider({ children }: { children: ReactNode }) {
         }
         client?.publish(topic, messageResult);
     };
-
+    const onMessage = useCallback((handler: MqttMessageHandler) => {
+        console.log('MQTT 添加消息监听器：', handler);
+        handlersRef.current.add(handler);
+        // 返回注销函数
+        return () => {
+            handlersRef.current.delete(handler);
+        };
+    }, []);
     return (
         <MqttContext.Provider value={{
             client,
@@ -117,6 +133,7 @@ export function MqttProvider({ children }: { children: ReactNode }) {
             isConnected,
             subscribe,
             publish,
+            onMessage
         }}>
             {children}
         </MqttContext.Provider>

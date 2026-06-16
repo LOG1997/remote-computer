@@ -12,12 +12,11 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Video_controlIndexRouteImport } from './routes/video_control/index'
 import { Route as Shutdown_controlIndexRouteImport } from './routes/shutdown_control/index'
-import { Route as RemoteControlIndexRouteImport } from './routes/remote-control/index'
+import { Route as MqttConfigIndexRouteImport } from './routes/mqttConfig/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as Video_controlBilibiliIndexRouteImport } from './routes/video_control/bilibili/index'
 import { Route as Shutdown_controlDashboardIndexRouteImport } from './routes/shutdown_control/dashboard/index'
 import { Route as Shutdown_controlConfigIndexRouteImport } from './routes/shutdown_control/config/index'
-import { Route as RemoteControlBilibiliIndexRouteImport } from './routes/remote-control/bilibili/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,9 +33,9 @@ const Shutdown_controlIndexRoute = Shutdown_controlIndexRouteImport.update({
   path: '/shutdown_control/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RemoteControlIndexRoute = RemoteControlIndexRouteImport.update({
-  id: '/remote-control/',
-  path: '/remote-control/',
+const MqttConfigIndexRoute = MqttConfigIndexRouteImport.update({
+  id: '/mqttConfig/',
+  path: '/mqttConfig/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeIndexRoute = HomeIndexRouteImport.update({
@@ -62,20 +61,13 @@ const Shutdown_controlConfigIndexRoute =
     path: '/shutdown_control/config/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const RemoteControlBilibiliIndexRoute =
-  RemoteControlBilibiliIndexRouteImport.update({
-    id: '/remote-control/bilibili/',
-    path: '/remote-control/bilibili/',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home/': typeof HomeIndexRoute
-  '/remote-control/': typeof RemoteControlIndexRoute
+  '/mqttConfig/': typeof MqttConfigIndexRoute
   '/shutdown_control/': typeof Shutdown_controlIndexRoute
   '/video_control/': typeof Video_controlIndexRoute
-  '/remote-control/bilibili/': typeof RemoteControlBilibiliIndexRoute
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
@@ -83,10 +75,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeIndexRoute
-  '/remote-control': typeof RemoteControlIndexRoute
+  '/mqttConfig': typeof MqttConfigIndexRoute
   '/shutdown_control': typeof Shutdown_controlIndexRoute
   '/video_control': typeof Video_controlIndexRoute
-  '/remote-control/bilibili': typeof RemoteControlBilibiliIndexRoute
   '/shutdown_control/config': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili': typeof Video_controlBilibiliIndexRoute
@@ -95,10 +86,9 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/home/': typeof HomeIndexRoute
-  '/remote-control/': typeof RemoteControlIndexRoute
+  '/mqttConfig/': typeof MqttConfigIndexRoute
   '/shutdown_control/': typeof Shutdown_controlIndexRoute
   '/video_control/': typeof Video_controlIndexRoute
-  '/remote-control/bilibili/': typeof RemoteControlBilibiliIndexRoute
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
@@ -108,10 +98,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/home/'
-    | '/remote-control/'
+    | '/mqttConfig/'
     | '/shutdown_control/'
     | '/video_control/'
-    | '/remote-control/bilibili/'
     | '/shutdown_control/config/'
     | '/shutdown_control/dashboard/'
     | '/video_control/bilibili/'
@@ -119,10 +108,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/home'
-    | '/remote-control'
+    | '/mqttConfig'
     | '/shutdown_control'
     | '/video_control'
-    | '/remote-control/bilibili'
     | '/shutdown_control/config'
     | '/shutdown_control/dashboard'
     | '/video_control/bilibili'
@@ -130,10 +118,9 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/home/'
-    | '/remote-control/'
+    | '/mqttConfig/'
     | '/shutdown_control/'
     | '/video_control/'
-    | '/remote-control/bilibili/'
     | '/shutdown_control/config/'
     | '/shutdown_control/dashboard/'
     | '/video_control/bilibili/'
@@ -142,10 +129,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
-  RemoteControlIndexRoute: typeof RemoteControlIndexRoute
+  MqttConfigIndexRoute: typeof MqttConfigIndexRoute
   Shutdown_controlIndexRoute: typeof Shutdown_controlIndexRoute
   Video_controlIndexRoute: typeof Video_controlIndexRoute
-  RemoteControlBilibiliIndexRoute: typeof RemoteControlBilibiliIndexRoute
   Shutdown_controlConfigIndexRoute: typeof Shutdown_controlConfigIndexRoute
   Shutdown_controlDashboardIndexRoute: typeof Shutdown_controlDashboardIndexRoute
   Video_controlBilibiliIndexRoute: typeof Video_controlBilibiliIndexRoute
@@ -174,11 +160,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Shutdown_controlIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/remote-control/': {
-      id: '/remote-control/'
-      path: '/remote-control'
-      fullPath: '/remote-control/'
-      preLoaderRoute: typeof RemoteControlIndexRouteImport
+    '/mqttConfig/': {
+      id: '/mqttConfig/'
+      path: '/mqttConfig'
+      fullPath: '/mqttConfig/'
+      preLoaderRoute: typeof MqttConfigIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home/': {
@@ -209,23 +195,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Shutdown_controlConfigIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/remote-control/bilibili/': {
-      id: '/remote-control/bilibili/'
-      path: '/remote-control/bilibili'
-      fullPath: '/remote-control/bilibili/'
-      preLoaderRoute: typeof RemoteControlBilibiliIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HomeIndexRoute: HomeIndexRoute,
-  RemoteControlIndexRoute: RemoteControlIndexRoute,
+  MqttConfigIndexRoute: MqttConfigIndexRoute,
   Shutdown_controlIndexRoute: Shutdown_controlIndexRoute,
   Video_controlIndexRoute: Video_controlIndexRoute,
-  RemoteControlBilibiliIndexRoute: RemoteControlBilibiliIndexRoute,
   Shutdown_controlConfigIndexRoute: Shutdown_controlConfigIndexRoute,
   Shutdown_controlDashboardIndexRoute: Shutdown_controlDashboardIndexRoute,
   Video_controlBilibiliIndexRoute: Video_controlBilibiliIndexRoute,
