@@ -9,7 +9,7 @@ import {
     ItemTitle,
 } from "@workspace/ui/components/item"
 import { usePlatform } from '@/stores'
-import { RightHeader } from './Header/_right'
+import { RightHeader } from './Header/-right'
 import { useEffect } from 'react'
 
 export const Route = createFileRoute('/video_control/')({

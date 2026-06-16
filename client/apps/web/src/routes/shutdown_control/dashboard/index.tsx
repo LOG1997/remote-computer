@@ -8,7 +8,7 @@ import CpuCard from "./components/CpuCard/-index"
 import MemoryCard from "./components/MemoryCard/-index"
 import StatusCard from "./components/StatusCard/-index"
 import { useEffect } from 'react'
-import { LeftHeader } from './Header/_left'
+import { LeftHeader } from './Header/-left'
 
 export const Route = createFileRoute('/shutdown_control/dashboard/')({
     component: Dashboard,

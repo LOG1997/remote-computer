@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/button'
 import { useMqtt } from '@/components/mqtt/MqttContext'
-import { DirectionPart } from './parts/_Direction'
-import { OtherActionGroup } from './parts/_OtherActionGroup'
-import { CenterHeader } from '../Header/_center'
-import { RightHeader } from '../Header/_right'
-import { VolumeAction } from './parts/_VolumeAction'
+import { DirectionPart } from './parts/-Direction'
+import { OtherActionGroup } from './parts/-OtherActionGroup'
+import { CenterHeader } from '../Header/-center'
+import { RightHeader } from '../Header/-right'
+import { VolumeAction } from './parts/-VolumeAction'
 
 export const Route = createFileRoute('/video_control/bilibili/')({
     loader: async () => {
