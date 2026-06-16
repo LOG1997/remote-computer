@@ -34,6 +34,7 @@ export function VolumeAction() {
         };
     }, [])
     // 在组件外部或内部创建防抖函数
+    // mute发送switch才是切换，其他的不执行操作
     const debouncedPublish = useMemo(() => {
         return debounce((publishFn: (topic: string, message: any) => void, val: number, mute: string) => {
             publishFn('tv-web/control/volume', JSON.stringify({ mute, volume: val }));
@@ -46,7 +47,7 @@ export function VolumeAction() {
     }, [debouncedPublish]);
     const onChangeVolume = (value: number[]) => {
         setVolumeValue(value);
-        debouncedPublish(publish, value[0]);
+        debouncedPublish(publish, value[0], "none");
     }
     const onChangeVolumeStart = () => {
         isInteractingRef.current = true;

@@ -24,9 +24,23 @@ export function OtherActionGroup() {
             payload: searchValue
         })
     }
+    const openHistory = () => {
+        mqttClient.publish('tv-web/log1997/receive', {
+            action: 'bilibili',
+            data: 'history',
+            payload: ''
+        })
+    }
+    const openPostPage = () => {
+        mqttClient.publish('tv-web/log1997/receive', {
+            action: 'bilibili',
+            data: 'post',
+            payload: ''
+        })
+    }
     return <div className="other-action-group flex justify-between px-6 my-6">
         <div className="w-3/12 h-10">
-            <Button className="w-full h-full">
+            <Button className="w-full h-full" onClick={openHistory}>
                 <History className="h-4 w-4" />
             </Button>
         </div>
@@ -72,9 +86,9 @@ export function OtherActionGroup() {
             </Button> */}
         </div>
         <div className="w-3/12 h-10">
-            <Button className="w-full h-full">
+            <Button className="w-full h-full" onClick={openPostPage}>
                 <LoaderPinwheel className="h-4 w-4" />
             </Button>
         </div>
-    </div>
+    </div >
 }

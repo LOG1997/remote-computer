@@ -1,11 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Button } from '@workspace/ui/components/button'
-import { useMqtt } from '@/components/mqtt/MqttContext'
 import { DirectionPart } from './parts/-Direction'
 import { OtherActionGroup } from './parts/-OtherActionGroup'
 import { CenterHeader } from '../Header/-center'
 import { RightHeader } from '../Header/-right'
 import { VolumeAction } from './parts/-VolumeAction'
+import { VideoOption } from './parts/-VideoOption'
 
 export const Route = createFileRoute('/video_control/bilibili/')({
     loader: async () => {
@@ -17,25 +16,11 @@ export const Route = createFileRoute('/video_control/bilibili/')({
         }
     },
     component: function RouteComponent() {
-        const mqttClient = useMqtt()
-
-        const handleNavigate = (direction: 'back' | 'forward') => {
-            mqttClient.publish('tv-web/log1997/receive', {
-                action: 'navigate',
-                data: direction
-            })
-        }
-
         return <div>
+            <VideoOption />
             <DirectionPart />
             <OtherActionGroup />
             <VolumeAction />
-            <Button onClick={() => handleNavigate('back')}>
-                后退
-            </Button>
-            <Button onClick={() => handleNavigate('forward')}>
-                前进
-            </Button>
         </div>
     },
 })
