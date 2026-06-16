@@ -55,6 +55,21 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
                                 log::error!("设置静音失败: {:?}", e);
                             } else {
                                 log::info!("处理静音控制: {}", msg.payload);
+                                let new_volume_muted = volume_control.get_mute().unwrap();
+                                let new_volume = volume_control.get_volume().unwrap();
+                                let state = serde_json::json!({
+                                    "volume": new_volume,
+                                    "mute": new_volume_muted
+                                });
+                                if pub_tx_clone
+                                    .blocking_send(MqttPublishRequest {
+                                        topic: "tv-web/volume/state/send".to_string(),
+                                        payload: state.to_string(),
+                                    })
+                                    .is_err()
+                                {
+                                    log::error!("无法将状态推送到 MQTT");
+                                };
                             }
                         } else if payload["volume"].is_number() {
                             let volume = payload["volume"].as_u64().unwrap() as u8;
@@ -62,6 +77,21 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
                                 log::error!("设置音量失败: {:?}", e);
                             } else {
                                 log::info!("处理音量控制: {}", msg.payload);
+                                let new_volume_muted = volume_control.get_mute().unwrap();
+                                let new_volume = volume_control.get_volume().unwrap();
+                                let state = serde_json::json!({
+                                    "volume": new_volume,
+                                    "mute": new_volume_muted
+                                });
+                                if pub_tx_clone
+                                    .blocking_send(MqttPublishRequest {
+                                        topic: "tv-web/volume/state/send".to_string(),
+                                        payload: state.to_string(),
+                                    })
+                                    .is_err()
+                                {
+                                    log::error!("无法将状态推送到 MQTT");
+                                };
                             }
                         }
                     } else if msg.topic == "tv-web/volume/state/receive" {
@@ -145,7 +175,7 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
     let topics = vec![
         SubscribeFilter::new("tv-web/control/volume".to_string(), QoS::AtLeastOnce),
         SubscribeFilter::new("tv-web/volume/state/receive".to_string(), QoS::AtLeastOnce),
-        SubscribeFilter::new("tv-web/volume/state/send".to_string(), QoS::AtLeastOnce),
+        // SubscribeFilter::new("tv-web/volume/state/send".to_string(), QoS::AtLeastOnce),
         SubscribeFilter::new("tv-web/control/launch_app".to_string(), QoS::AtMostOnce),
     ];
 

@@ -75,6 +75,7 @@ export function MqttProvider({ children }: { children: ReactNode }) {
 
         // 接收消息
         mqttClient.on('message', (topic, payload) => {
+            console.log('Received message:', topic, payload.toString());
             const msg: MqttMessage = {
                 topic,
                 payload: payload.toString(),

@@ -5,6 +5,7 @@ import { DirectionPart } from './parts/_Direction'
 import { OtherActionGroup } from './parts/_OtherActionGroup'
 import { CenterHeader } from '../Header/_center'
 import { RightHeader } from '../Header/_right'
+import { VolumeAction } from './parts/_VolumeAction'
 
 export const Route = createFileRoute('/video_control/bilibili/')({
     loader: async () => {
@@ -28,6 +29,7 @@ export const Route = createFileRoute('/video_control/bilibili/')({
         return <div>
             <DirectionPart />
             <OtherActionGroup />
+            <VolumeAction />
             <Button onClick={() => handleNavigate('back')}>
                 后退
             </Button>
