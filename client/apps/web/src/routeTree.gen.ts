@@ -12,7 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as Video_controlIndexRouteImport } from './routes/video_control/index'
 import { Route as Shutdown_controlIndexRouteImport } from './routes/shutdown_control/index'
-import { Route as MqttConfigIndexRouteImport } from './routes/mqttConfig/index'
+import { Route as Mqtt_configIndexRouteImport } from './routes/mqtt_config/index'
 import { Route as Launch_appIndexRouteImport } from './routes/launch_app/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
 import { Route as Video_controlBilibiliIndexRouteImport } from './routes/video_control/bilibili/index'
@@ -34,9 +34,9 @@ const Shutdown_controlIndexRoute = Shutdown_controlIndexRouteImport.update({
   path: '/shutdown_control/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MqttConfigIndexRoute = MqttConfigIndexRouteImport.update({
-  id: '/mqttConfig/',
-  path: '/mqttConfig/',
+const Mqtt_configIndexRoute = Mqtt_configIndexRouteImport.update({
+  id: '/mqtt_config/',
+  path: '/mqtt_config/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Launch_appIndexRoute = Launch_appIndexRouteImport.update({
@@ -72,7 +72,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/home/': typeof HomeIndexRoute
   '/launch_app/': typeof Launch_appIndexRoute
-  '/mqttConfig/': typeof MqttConfigIndexRoute
+  '/mqtt_config/': typeof Mqtt_configIndexRoute
   '/shutdown_control/': typeof Shutdown_controlIndexRoute
   '/video_control/': typeof Video_controlIndexRoute
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
@@ -83,7 +83,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/home': typeof HomeIndexRoute
   '/launch_app': typeof Launch_appIndexRoute
-  '/mqttConfig': typeof MqttConfigIndexRoute
+  '/mqtt_config': typeof Mqtt_configIndexRoute
   '/shutdown_control': typeof Shutdown_controlIndexRoute
   '/video_control': typeof Video_controlIndexRoute
   '/shutdown_control/config': typeof Shutdown_controlConfigIndexRoute
@@ -95,7 +95,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/home/': typeof HomeIndexRoute
   '/launch_app/': typeof Launch_appIndexRoute
-  '/mqttConfig/': typeof MqttConfigIndexRoute
+  '/mqtt_config/': typeof Mqtt_configIndexRoute
   '/shutdown_control/': typeof Shutdown_controlIndexRoute
   '/video_control/': typeof Video_controlIndexRoute
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
@@ -108,7 +108,7 @@ export interface FileRouteTypes {
     | '/'
     | '/home/'
     | '/launch_app/'
-    | '/mqttConfig/'
+    | '/mqtt_config/'
     | '/shutdown_control/'
     | '/video_control/'
     | '/shutdown_control/config/'
@@ -119,7 +119,7 @@ export interface FileRouteTypes {
     | '/'
     | '/home'
     | '/launch_app'
-    | '/mqttConfig'
+    | '/mqtt_config'
     | '/shutdown_control'
     | '/video_control'
     | '/shutdown_control/config'
@@ -130,7 +130,7 @@ export interface FileRouteTypes {
     | '/'
     | '/home/'
     | '/launch_app/'
-    | '/mqttConfig/'
+    | '/mqtt_config/'
     | '/shutdown_control/'
     | '/video_control/'
     | '/shutdown_control/config/'
@@ -142,7 +142,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HomeIndexRoute: typeof HomeIndexRoute
   Launch_appIndexRoute: typeof Launch_appIndexRoute
-  MqttConfigIndexRoute: typeof MqttConfigIndexRoute
+  Mqtt_configIndexRoute: typeof Mqtt_configIndexRoute
   Shutdown_controlIndexRoute: typeof Shutdown_controlIndexRoute
   Video_controlIndexRoute: typeof Video_controlIndexRoute
   Shutdown_controlConfigIndexRoute: typeof Shutdown_controlConfigIndexRoute
@@ -173,11 +173,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Shutdown_controlIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mqttConfig/': {
-      id: '/mqttConfig/'
-      path: '/mqttConfig'
-      fullPath: '/mqttConfig/'
-      preLoaderRoute: typeof MqttConfigIndexRouteImport
+    '/mqtt_config/': {
+      id: '/mqtt_config/'
+      path: '/mqtt_config'
+      fullPath: '/mqtt_config/'
+      preLoaderRoute: typeof Mqtt_configIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/launch_app/': {
@@ -222,7 +222,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HomeIndexRoute: HomeIndexRoute,
   Launch_appIndexRoute: Launch_appIndexRoute,
-  MqttConfigIndexRoute: MqttConfigIndexRoute,
+  Mqtt_configIndexRoute: Mqtt_configIndexRoute,
   Shutdown_controlIndexRoute: Shutdown_controlIndexRoute,
   Video_controlIndexRoute: Video_controlIndexRoute,
   Shutdown_controlConfigIndexRoute: Shutdown_controlConfigIndexRoute,

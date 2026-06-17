@@ -4,7 +4,7 @@ import { useMqtt } from "@/components/mqtt/MqttContext"
 import { Volume2, VolumeOff } from "lucide-react"
 import { debounce } from 'lodash-es';
 export function VolumeAction() {
-    const { onMessage, isConnected, subscribe, publish } = useMqtt()
+    const { onMessage, subscribe, publish } = useMqtt()
     const [volumeValue, setVolumeValue] = useState([0])
     const [volumeMute, setVolumeMute] = useState(false)
     // ref 用于标记当前是否正在由用户拖动滑块

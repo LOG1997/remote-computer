@@ -2,7 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { MqttConfigForm } from './parts/-MqttConfig'
 import { useMqttConfig } from '@/stores'
 
-export const Route = createFileRoute('/mqttConfig/')({
+export const Route = createFileRoute('/mqtt_config/')({
     component: function MqttConfigPage() {
         const configData = useMqttConfig((state) => state.mqttConfig)
         const setConfig = useMqttConfig((state) => state.setConfig)

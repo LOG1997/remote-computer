@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router'
 import { AppLaunchList } from '@/constant/app'
 import {
     Item,
@@ -8,8 +8,6 @@ import {
     ItemHeader,
     ItemTitle,
 } from "@workspace/ui/components/item"
-import { usePlatform } from '@/stores'
-import { useEffect } from 'react'
 import { useMqtt } from '@/components/mqtt/MqttContext'
 
 export const Route = createFileRoute('/launch_app/')({

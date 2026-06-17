@@ -1,12 +1,12 @@
 import { OrayIcon, WechatIcon, BilibiliIcon, ClashIcon } from '@/components/icons'
 
 export const AppLaunchList = [
-    // {
-    //     name: '向日葵',
-    //     value: 'bilibili',
-    //     description: '向日葵远程软件',
-    //     icon: <OrayIcon className="w-10 h-10" />,
-    // },
+    {
+        name: '向日葵',
+        value: 'oray',
+        description: '向日葵远程软件',
+        icon: <OrayIcon className="w-10 h-10" />,
+    },
     {
         name: '微信',
         value: 'wx',
