@@ -125,6 +125,55 @@ pub fn launch_app(app_name: &str) -> Result<(), String> {
     Ok(())
 }
 
+// 使用自研的to命令来启动应用
+pub fn launch_app_with_to(app_name: &str) -> Result<(), String> {
+    let command = format!("to {}", app_name);
+    #[cfg(target_os = "windows")]
+    {
+        match Command::new("cmd").arg("/c").arg(command).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                } else {
+                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+                }
+            }
+        }
+    }
+    #[cfg(target_os = "linux")]
+    {
+        match Command::new("sh").arg("-c").arg(command).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                } else {
+                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+                }
+            }
+            Err(err) => {
+                eprintln!("Failed to execute command: {}", err);
+            }
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        match Command::new("to").arg("-a").arg(app_name).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                } else {
+                    eprintln!("{}", String::from_utf8_lossy(&output.stderr));
+                }
+            }
+            Err(err) => {
+                eprintln!("Failed to execute command: {}", err);
+            }
+        }
+    }
+
+    Ok(())
+}
+
 // 定义返回数据的结构体
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SystemInfoResponse {

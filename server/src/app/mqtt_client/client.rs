@@ -1,6 +1,6 @@
 use crate::common::config::MqttConfig;
 use crate::system::control_volume::{AudioControl, VolumeControl};
-use crate::system::operate::launch_app;
+use crate::system::operate::launch_app_with_to;
 use anyhow::Result;
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
 use std::time::Duration;
@@ -112,7 +112,7 @@ pub async fn start_mqtt(mqtt_config: &MqttConfig) -> Result<()> {
                     } else if msg.topic == "tv-web/control/launch_app" {
                         if payload["app_name"].is_string() {
                             let app_name = payload["app_name"].as_str().unwrap();
-                            if let Err(e) = launch_app(app_name) {
+                            if let Err(e) = launch_app_with_to(app_name) {
                                 log::error!("启动应用程序失败: {:?}", e);
                             } else {
                                 log::info!("asdasd")

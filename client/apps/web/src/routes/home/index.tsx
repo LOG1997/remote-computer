@@ -23,5 +23,8 @@ function RouteComponent() {
         <div>
             <Button onClick={() => onClick('/video_control')}>遥控器</Button>
         </div>
+        <div>
+            <Button onClick={() => onClick('/launch_app')}>打开应用</Button>
+        </div>
     </div>
 }
