@@ -62,6 +62,7 @@ export function MqttProvider({ children }: { children: ReactNode }) {
             password: configData.password,
             clean: true,
             connectTimeout: 5000,
+            keepalive: 60,
         };
 
 
@@ -95,8 +96,15 @@ export function MqttProvider({ children }: { children: ReactNode }) {
 
         // 错误/断开
         mqttClient.on('error', (err) => console.error('MQTT 错误：', err));
-        mqttClient.on('close', () => setIsConnected(false));
-
+        mqttClient.on('close', () => {
+            console.log('MQTT 断开连接');
+            setIsConnected(false)
+        });
+        // 监听重连事件（这很重要，能区分是首次连接还是断线重连）
+        mqttClient.on('reconnect', () => {
+            console.log('🔄 MQTT 正在重连...');
+            setIsConnected(false); // 重连过程中视为未连接
+        });
         // 断开旧连接
         return () => {
             if (mqttClient) mqttClient.end();
