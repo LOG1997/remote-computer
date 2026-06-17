@@ -1,4 +1,4 @@
-import { OrayIcon, WechatIcon, BilibiliIcon, ClashIcon } from '@/components/icons'
+import { OrayIcon, WechatIcon, BilibiliIcon, ClashIcon, SteamIcon } from '@/components/icons'
 
 export const AppLaunchList = [
     {
@@ -23,6 +23,12 @@ export const AppLaunchList = [
         name: 'ClashVerge',
         value: 'clash',
         description: 'clash代理软件',
-        icon: <ClashIcon className="w-10 h-10 text-blue-400" />,
+        icon: <ClashIcon className="w-10 h-10" />,
     },
+    {
+        name: 'Steam',
+        value: 'steam',
+        description: 'steam游戏软件',
+        icon: <SteamIcon className="w-10 h-10" />,
+    }
 ]
