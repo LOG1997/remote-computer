@@ -4,6 +4,7 @@ import { useMqtt } from '@/components/mqtt/MqttContext'
 export function DirectionPart() {
     const mqttClient = useMqtt()
     const handleMove = (direction: 'up' | 'down' | 'left' | 'right') => {
+        navigator.vibrate(50)
         mqttClient.publish('tv-web/log1997/receive', {
             action: 'bilibili',
             data: direction

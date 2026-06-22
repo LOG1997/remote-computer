@@ -18,6 +18,7 @@ export function OtherActionGroup() {
     const [searchValue, setSearchValue] = useState('')
     const mqttClient = useMqtt()
     const handleSearch = () => {
+        navigator.vibrate(100)
         mqttClient.publish('tv-web/log1997/receive', {
             action: 'bilibili',
             data: 'search',
@@ -25,6 +26,7 @@ export function OtherActionGroup() {
         })
     }
     const openHistory = () => {
+        navigator.vibrate(100)
         mqttClient.publish('tv-web/log1997/receive', {
             action: 'bilibili',
             data: 'history',
@@ -32,6 +34,7 @@ export function OtherActionGroup() {
         })
     }
     const openPostPage = () => {
+        navigator.vibrate(100)
         mqttClient.publish('tv-web/log1997/receive', {
             action: 'bilibili',
             data: 'post',

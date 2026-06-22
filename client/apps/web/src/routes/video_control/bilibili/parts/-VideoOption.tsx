@@ -5,6 +5,7 @@ import { useMqtt } from '@/components/mqtt/MqttContext'
 export function VideoOption() {
     const { publish } = useMqtt()
     const handleNavigate = (direction: 'back' | 'forward') => {
+        navigator.vibrate(50)
         publish('tv-web/log1997/receive', {
             action: 'navigate',
             data: direction

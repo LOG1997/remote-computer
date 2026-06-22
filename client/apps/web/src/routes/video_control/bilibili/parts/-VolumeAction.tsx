@@ -50,6 +50,7 @@ export function VolumeAction() {
         debouncedPublish(publish, value[0], "none");
     }
     const onChangeVolumeStart = () => {
+        navigator.vibrate?.(50);
         isInteractingRef.current = true;
     };
 
@@ -58,6 +59,7 @@ export function VolumeAction() {
         debouncedPublish.flush();
     };
     const onChangeMute = () => {
+        navigator.vibrate?.(50);
         setVolumeMute(!volumeMute);
         debouncedPublish(publish, volumeValue[0], 'switch');
     }

@@ -138,6 +138,9 @@ pub fn launch_app_with_to(app_name: &str) -> Result<(), String> {
                     eprintln!("{}", String::from_utf8_lossy(&output.stderr));
                 }
             }
+            Err(err) => {
+                eprintln!("Failed to execute command: {}", err);
+            }
         }
     }
     #[cfg(target_os = "linux")]
