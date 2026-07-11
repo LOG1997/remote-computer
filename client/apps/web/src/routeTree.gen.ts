@@ -15,6 +15,7 @@ import { Route as Shutdown_controlIndexRouteImport } from './routes/shutdown_con
 import { Route as Mqtt_configIndexRouteImport } from './routes/mqtt_config/index'
 import { Route as Launch_appIndexRouteImport } from './routes/launch_app/index'
 import { Route as HomeIndexRouteImport } from './routes/home/index'
+import { Route as Video_controlDouyinIndexRouteImport } from './routes/video_control/douyin/index'
 import { Route as Video_controlBilibiliIndexRouteImport } from './routes/video_control/bilibili/index'
 import { Route as Shutdown_controlDashboardIndexRouteImport } from './routes/shutdown_control/dashboard/index'
 import { Route as Shutdown_controlConfigIndexRouteImport } from './routes/shutdown_control/config/index'
@@ -49,6 +50,12 @@ const HomeIndexRoute = HomeIndexRouteImport.update({
   path: '/home/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Video_controlDouyinIndexRoute =
+  Video_controlDouyinIndexRouteImport.update({
+    id: '/video_control/douyin/',
+    path: '/video_control/douyin/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const Video_controlBilibiliIndexRoute =
   Video_controlBilibiliIndexRouteImport.update({
     id: '/video_control/bilibili/',
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
+  '/video_control/douyin/': typeof Video_controlDouyinIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -89,6 +97,7 @@ export interface FileRoutesByTo {
   '/shutdown_control/config': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili': typeof Video_controlBilibiliIndexRoute
+  '/video_control/douyin': typeof Video_controlDouyinIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,6 +110,7 @@ export interface FileRoutesById {
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
+  '/video_control/douyin/': typeof Video_controlDouyinIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
     | '/shutdown_control/config/'
     | '/shutdown_control/dashboard/'
     | '/video_control/bilibili/'
+    | '/video_control/douyin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
     | '/shutdown_control/config'
     | '/shutdown_control/dashboard'
     | '/video_control/bilibili'
+    | '/video_control/douyin'
   id:
     | '__root__'
     | '/'
@@ -136,6 +148,7 @@ export interface FileRouteTypes {
     | '/shutdown_control/config/'
     | '/shutdown_control/dashboard/'
     | '/video_control/bilibili/'
+    | '/video_control/douyin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -148,6 +161,7 @@ export interface RootRouteChildren {
   Shutdown_controlConfigIndexRoute: typeof Shutdown_controlConfigIndexRoute
   Shutdown_controlDashboardIndexRoute: typeof Shutdown_controlDashboardIndexRoute
   Video_controlBilibiliIndexRoute: typeof Video_controlBilibiliIndexRoute
+  Video_controlDouyinIndexRoute: typeof Video_controlDouyinIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -194,6 +208,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HomeIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/video_control/douyin/': {
+      id: '/video_control/douyin/'
+      path: '/video_control/douyin'
+      fullPath: '/video_control/douyin/'
+      preLoaderRoute: typeof Video_controlDouyinIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/video_control/bilibili/': {
       id: '/video_control/bilibili/'
       path: '/video_control/bilibili'
@@ -228,6 +249,7 @@ const rootRouteChildren: RootRouteChildren = {
   Shutdown_controlConfigIndexRoute: Shutdown_controlConfigIndexRoute,
   Shutdown_controlDashboardIndexRoute: Shutdown_controlDashboardIndexRoute,
   Video_controlBilibiliIndexRoute: Video_controlBilibiliIndexRoute,
+  Video_controlDouyinIndexRoute: Video_controlDouyinIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
