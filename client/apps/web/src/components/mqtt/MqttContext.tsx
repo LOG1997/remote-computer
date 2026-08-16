@@ -1,8 +1,9 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useEffect, useState, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import mqtt from 'mqtt';
 import type { MqttClient } from 'mqtt'
-import { useConfigurationStore } from '@/stores'
+import { useMqttConfig } from '@/stores'
 
 // -------------- 类型定义 --------------
 export interface MqttMessage {
@@ -13,21 +14,21 @@ export interface MqttMessage {
 
 // MQTT 配置类型（和你的 store 结构对应）
 export interface MqttConfig {
-    // protocol: 'ws' | 'wss';
-    host: string;
-    mqtt_port: string;
-    path?: string;
+    address: string;
+    port: number;
+    path: string;
     username?: string;
     password?: string;
-    clientId?: string;
+    topicName: string;
 }
-
+export type MqttMessageHandler = (msg: MqttMessage) => void;
 interface MqttContextType {
     client: MqttClient | null;
     messages: MqttMessage[];
     isConnected: boolean;
     subscribe: (topic: string) => void;
     publish: (topic: string, message: any) => void;
+    onMessage: (handler: MqttMessageHandler) => () => void;
 }
 
 const MqttContext = createContext<MqttContextType | undefined>(undefined);
@@ -37,18 +38,19 @@ export function MqttProvider({ children }: { children: ReactNode }) {
     const [messages, setMessages] = useState<MqttMessage[]>([]);
     const [isConnected, setIsConnected] = useState(false);
 
-    const configData = useConfigurationStore((state) => state.config)
+    const handlersRef = useRef<Set<MqttMessageHandler>>(new Set());
+    const configData = useMqttConfig((state) => state.mqttConfig)
     const { protocol } = window.location
     // 生成连接地址
     const getMqttUrl = (config: MqttConfig) => {
         const ws_protocol = protocol === 'https:' ? 'wss' : 'ws'
-        return `${ws_protocol}://${config.host}:${config.mqtt_port}${'/mqtt'}`;
+        return `${ws_protocol}://${config.address}:${config.port}${'/mqtt'}`;
     };
 
     // 连接 MQTT
     useEffect(() => {
         // 如果配置不完整，不连接
-        if (!configData?.host || !configData?.mqtt_port) return;
+        if (!configData?.address || !configData?.port) return;
 
         const url = getMqttUrl(configData);
         console.log('正在连接 MQTT：', url);
@@ -56,11 +58,14 @@ export function MqttProvider({ children }: { children: ReactNode }) {
         // 客户端配置
         const options = {
             clientId: 'react-app-' + Math.random().toString(16).slice(2, 10),
-            // username: configData.username,
-            // password: configData.password,
+            username: configData.username,
+            password: configData.password,
             clean: true,
             connectTimeout: 5000,
+            keepalive: 60,
         };
+
+
 
         const mqttClient = mqtt.connect(url, options);
 
@@ -73,18 +78,33 @@ export function MqttProvider({ children }: { children: ReactNode }) {
 
         // 接收消息
         mqttClient.on('message', (topic, payload) => {
+            console.log('Received message:', topic, payload.toString());
             const msg: MqttMessage = {
                 topic,
                 payload: payload.toString(),
                 time: new Date().toLocaleString(),
             };
             setMessages(prev => [...prev, msg]);
+            handlersRef.current.forEach(handler => {
+                try {
+                    handler(msg);
+                } catch (error) {
+                    console.error('MQTT 消息回调执行错误:', error);
+                }
+            });
         });
 
         // 错误/断开
         mqttClient.on('error', (err) => console.error('MQTT 错误：', err));
-        mqttClient.on('close', () => setIsConnected(false));
-
+        mqttClient.on('close', () => {
+            console.log('MQTT 断开连接');
+            setIsConnected(false)
+        });
+        // 监听重连事件（这很重要，能区分是首次连接还是断线重连）
+        mqttClient.on('reconnect', () => {
+            console.log('🔄 MQTT 正在重连...');
+            setIsConnected(false); // 重连过程中视为未连接
+        });
         // 断开旧连接
         return () => {
             if (mqttClient) mqttClient.end();
@@ -106,7 +126,14 @@ export function MqttProvider({ children }: { children: ReactNode }) {
         }
         client?.publish(topic, messageResult);
     };
-
+    const onMessage = useCallback((handler: MqttMessageHandler) => {
+        console.log('MQTT 添加消息监听器：', handler);
+        handlersRef.current.add(handler);
+        // 返回注销函数
+        return () => {
+            handlersRef.current.delete(handler);
+        };
+    }, []);
     return (
         <MqttContext.Provider value={{
             client,
@@ -114,6 +141,7 @@ export function MqttProvider({ children }: { children: ReactNode }) {
             isConnected,
             subscribe,
             publish,
+            onMessage
         }}>
             {children}
         </MqttContext.Provider>

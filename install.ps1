@@ -2,18 +2,18 @@
 
 <#
 .SYNOPSIS
-    安装 ShutdownRemote 应用并配置开机自启。
+    安装 RemoteComputer 应用并配置开机自启。
 .DESCRIPTION
     1. 将 ./dist 目录复制到用户主目录下的 remote-computer 文件夹。
-    2. 创建计划任务，在系统启动时运行 shutdown-auto.exe。
+    2. 创建计划任务，在系统启动时运行 remote-computer.exe。
 #>
 
 # 定义变量
 $SourceDir = Join-Path $PSScriptRoot "/"
 $TargetDir = Join-Path $env:USERPROFILE "remote-computer"
 $ExeName = "remote-computer.exe"
-$TaskName = "ShutdownRemoteAutoStart"
-$TaskDescription = "Automatically start ShutdownRemote agent on system startup."
+$TaskName = "RemoteComputerAutoStart"
+$TaskDescription = "Automatically start RemoteComputer agent on system startup."
 
 # 检查源目录是否存在
 if (-not (Test-Path $SourceDir)) {
@@ -27,7 +27,7 @@ if (-not (Test-Path $ExePathInDist)) {
     Write-Warning "警告: 在 dist 目录中未找到 '$ExeName'。计划任务可能无法正常工作。"
 }
 
-Write-Host "正在安装 ShutdownRemote..." -ForegroundColor Cyan
+Write-Host "正在安装 RemoteComputer..." -ForegroundColor Cyan
 
 # 首先检查计划任务是否已存在
 $NeedReinstall = $false

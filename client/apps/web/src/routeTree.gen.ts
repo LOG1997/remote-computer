@@ -10,90 +10,158 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RemoteControlIndexRouteImport } from './routes/remote-control/index'
-import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as ConfigIndexRouteImport } from './routes/config/index'
-import { Route as RemoteControlBilibiliIndexRouteImport } from './routes/remote-control/bilibili/index'
+import { Route as Video_controlIndexRouteImport } from './routes/video_control/index'
+import { Route as Shutdown_controlIndexRouteImport } from './routes/shutdown_control/index'
+import { Route as Mqtt_configIndexRouteImport } from './routes/mqtt_config/index'
+import { Route as Launch_appIndexRouteImport } from './routes/launch_app/index'
+import { Route as HomeIndexRouteImport } from './routes/home/index'
+import { Route as Video_controlDouyinIndexRouteImport } from './routes/video_control/douyin/index'
+import { Route as Video_controlBilibiliIndexRouteImport } from './routes/video_control/bilibili/index'
+import { Route as Shutdown_controlDashboardIndexRouteImport } from './routes/shutdown_control/dashboard/index'
+import { Route as Shutdown_controlConfigIndexRouteImport } from './routes/shutdown_control/config/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RemoteControlIndexRoute = RemoteControlIndexRouteImport.update({
-  id: '/remote-control/',
-  path: '/remote-control/',
+const Video_controlIndexRoute = Video_controlIndexRouteImport.update({
+  id: '/video_control/',
+  path: '/video_control/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/dashboard/',
-  path: '/dashboard/',
+const Shutdown_controlIndexRoute = Shutdown_controlIndexRouteImport.update({
+  id: '/shutdown_control/',
+  path: '/shutdown_control/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ConfigIndexRoute = ConfigIndexRouteImport.update({
-  id: '/config/',
-  path: '/config/',
+const Mqtt_configIndexRoute = Mqtt_configIndexRouteImport.update({
+  id: '/mqtt_config/',
+  path: '/mqtt_config/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RemoteControlBilibiliIndexRoute =
-  RemoteControlBilibiliIndexRouteImport.update({
-    id: '/remote-control/bilibili/',
-    path: '/remote-control/bilibili/',
+const Launch_appIndexRoute = Launch_appIndexRouteImport.update({
+  id: '/launch_app/',
+  path: '/launch_app/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeIndexRoute = HomeIndexRouteImport.update({
+  id: '/home/',
+  path: '/home/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Video_controlDouyinIndexRoute =
+  Video_controlDouyinIndexRouteImport.update({
+    id: '/video_control/douyin/',
+    path: '/video_control/douyin/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Video_controlBilibiliIndexRoute =
+  Video_controlBilibiliIndexRouteImport.update({
+    id: '/video_control/bilibili/',
+    path: '/video_control/bilibili/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Shutdown_controlDashboardIndexRoute =
+  Shutdown_controlDashboardIndexRouteImport.update({
+    id: '/shutdown_control/dashboard/',
+    path: '/shutdown_control/dashboard/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Shutdown_controlConfigIndexRoute =
+  Shutdown_controlConfigIndexRouteImport.update({
+    id: '/shutdown_control/config/',
+    path: '/shutdown_control/config/',
     getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/config/': typeof ConfigIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/remote-control/': typeof RemoteControlIndexRoute
-  '/remote-control/bilibili/': typeof RemoteControlBilibiliIndexRoute
+  '/home/': typeof HomeIndexRoute
+  '/launch_app/': typeof Launch_appIndexRoute
+  '/mqtt_config/': typeof Mqtt_configIndexRoute
+  '/shutdown_control/': typeof Shutdown_controlIndexRoute
+  '/video_control/': typeof Video_controlIndexRoute
+  '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
+  '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
+  '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
+  '/video_control/douyin/': typeof Video_controlDouyinIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/config': typeof ConfigIndexRoute
-  '/dashboard': typeof DashboardIndexRoute
-  '/remote-control': typeof RemoteControlIndexRoute
-  '/remote-control/bilibili': typeof RemoteControlBilibiliIndexRoute
+  '/home': typeof HomeIndexRoute
+  '/launch_app': typeof Launch_appIndexRoute
+  '/mqtt_config': typeof Mqtt_configIndexRoute
+  '/shutdown_control': typeof Shutdown_controlIndexRoute
+  '/video_control': typeof Video_controlIndexRoute
+  '/shutdown_control/config': typeof Shutdown_controlConfigIndexRoute
+  '/shutdown_control/dashboard': typeof Shutdown_controlDashboardIndexRoute
+  '/video_control/bilibili': typeof Video_controlBilibiliIndexRoute
+  '/video_control/douyin': typeof Video_controlDouyinIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/config/': typeof ConfigIndexRoute
-  '/dashboard/': typeof DashboardIndexRoute
-  '/remote-control/': typeof RemoteControlIndexRoute
-  '/remote-control/bilibili/': typeof RemoteControlBilibiliIndexRoute
+  '/home/': typeof HomeIndexRoute
+  '/launch_app/': typeof Launch_appIndexRoute
+  '/mqtt_config/': typeof Mqtt_configIndexRoute
+  '/shutdown_control/': typeof Shutdown_controlIndexRoute
+  '/video_control/': typeof Video_controlIndexRoute
+  '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
+  '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
+  '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
+  '/video_control/douyin/': typeof Video_controlDouyinIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/config/'
-    | '/dashboard/'
-    | '/remote-control/'
-    | '/remote-control/bilibili/'
+    | '/home/'
+    | '/launch_app/'
+    | '/mqtt_config/'
+    | '/shutdown_control/'
+    | '/video_control/'
+    | '/shutdown_control/config/'
+    | '/shutdown_control/dashboard/'
+    | '/video_control/bilibili/'
+    | '/video_control/douyin/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/config'
-    | '/dashboard'
-    | '/remote-control'
-    | '/remote-control/bilibili'
+    | '/home'
+    | '/launch_app'
+    | '/mqtt_config'
+    | '/shutdown_control'
+    | '/video_control'
+    | '/shutdown_control/config'
+    | '/shutdown_control/dashboard'
+    | '/video_control/bilibili'
+    | '/video_control/douyin'
   id:
     | '__root__'
     | '/'
-    | '/config/'
-    | '/dashboard/'
-    | '/remote-control/'
-    | '/remote-control/bilibili/'
+    | '/home/'
+    | '/launch_app/'
+    | '/mqtt_config/'
+    | '/shutdown_control/'
+    | '/video_control/'
+    | '/shutdown_control/config/'
+    | '/shutdown_control/dashboard/'
+    | '/video_control/bilibili/'
+    | '/video_control/douyin/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ConfigIndexRoute: typeof ConfigIndexRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-  RemoteControlIndexRoute: typeof RemoteControlIndexRoute
-  RemoteControlBilibiliIndexRoute: typeof RemoteControlBilibiliIndexRoute
+  HomeIndexRoute: typeof HomeIndexRoute
+  Launch_appIndexRoute: typeof Launch_appIndexRoute
+  Mqtt_configIndexRoute: typeof Mqtt_configIndexRoute
+  Shutdown_controlIndexRoute: typeof Shutdown_controlIndexRoute
+  Video_controlIndexRoute: typeof Video_controlIndexRoute
+  Shutdown_controlConfigIndexRoute: typeof Shutdown_controlConfigIndexRoute
+  Shutdown_controlDashboardIndexRoute: typeof Shutdown_controlDashboardIndexRoute
+  Video_controlBilibiliIndexRoute: typeof Video_controlBilibiliIndexRoute
+  Video_controlDouyinIndexRoute: typeof Video_controlDouyinIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -105,32 +173,67 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/remote-control/': {
-      id: '/remote-control/'
-      path: '/remote-control'
-      fullPath: '/remote-control/'
-      preLoaderRoute: typeof RemoteControlIndexRouteImport
+    '/video_control/': {
+      id: '/video_control/'
+      path: '/video_control'
+      fullPath: '/video_control/'
+      preLoaderRoute: typeof Video_controlIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard/': {
-      id: '/dashboard/'
-      path: '/dashboard'
-      fullPath: '/dashboard/'
-      preLoaderRoute: typeof DashboardIndexRouteImport
+    '/shutdown_control/': {
+      id: '/shutdown_control/'
+      path: '/shutdown_control'
+      fullPath: '/shutdown_control/'
+      preLoaderRoute: typeof Shutdown_controlIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/config/': {
-      id: '/config/'
-      path: '/config'
-      fullPath: '/config/'
-      preLoaderRoute: typeof ConfigIndexRouteImport
+    '/mqtt_config/': {
+      id: '/mqtt_config/'
+      path: '/mqtt_config'
+      fullPath: '/mqtt_config/'
+      preLoaderRoute: typeof Mqtt_configIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/remote-control/bilibili/': {
-      id: '/remote-control/bilibili/'
-      path: '/remote-control/bilibili'
-      fullPath: '/remote-control/bilibili/'
-      preLoaderRoute: typeof RemoteControlBilibiliIndexRouteImport
+    '/launch_app/': {
+      id: '/launch_app/'
+      path: '/launch_app'
+      fullPath: '/launch_app/'
+      preLoaderRoute: typeof Launch_appIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home/': {
+      id: '/home/'
+      path: '/home'
+      fullPath: '/home/'
+      preLoaderRoute: typeof HomeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/video_control/douyin/': {
+      id: '/video_control/douyin/'
+      path: '/video_control/douyin'
+      fullPath: '/video_control/douyin/'
+      preLoaderRoute: typeof Video_controlDouyinIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/video_control/bilibili/': {
+      id: '/video_control/bilibili/'
+      path: '/video_control/bilibili'
+      fullPath: '/video_control/bilibili/'
+      preLoaderRoute: typeof Video_controlBilibiliIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shutdown_control/dashboard/': {
+      id: '/shutdown_control/dashboard/'
+      path: '/shutdown_control/dashboard'
+      fullPath: '/shutdown_control/dashboard/'
+      preLoaderRoute: typeof Shutdown_controlDashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shutdown_control/config/': {
+      id: '/shutdown_control/config/'
+      path: '/shutdown_control/config'
+      fullPath: '/shutdown_control/config/'
+      preLoaderRoute: typeof Shutdown_controlConfigIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -138,10 +241,15 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ConfigIndexRoute: ConfigIndexRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-  RemoteControlIndexRoute: RemoteControlIndexRoute,
-  RemoteControlBilibiliIndexRoute: RemoteControlBilibiliIndexRoute,
+  HomeIndexRoute: HomeIndexRoute,
+  Launch_appIndexRoute: Launch_appIndexRoute,
+  Mqtt_configIndexRoute: Mqtt_configIndexRoute,
+  Shutdown_controlIndexRoute: Shutdown_controlIndexRoute,
+  Video_controlIndexRoute: Video_controlIndexRoute,
+  Shutdown_controlConfigIndexRoute: Shutdown_controlConfigIndexRoute,
+  Shutdown_controlDashboardIndexRoute: Shutdown_controlDashboardIndexRoute,
+  Video_controlBilibiliIndexRoute: Video_controlBilibiliIndexRoute,
+  Video_controlDouyinIndexRoute: Video_controlDouyinIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
