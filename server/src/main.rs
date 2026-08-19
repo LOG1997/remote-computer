@@ -1,29 +1,26 @@
 mod common;
-use common::app::get_app_dir;
-use common::config::AppConfig;
+use common::models::AppConfig;
 
-mod api;
-mod system;
+mod system_control;
+mod web_server;
 
-mod app;
-use app::mqtt_client::start_mqtt;
-use app::web_server::start_web_server;
-
+use dotenvy::dotenv;
 use tokio::signal;
 use tokio::task::JoinHandle;
 
 use anyhow::{Ok, Result};
 
-// 关机主函数
+use crate::web_server::start::start_web_server;
+
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
+    dotenv().ok();
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("Failed to install rustls crypto provider");
-    let app_dir = get_app_dir();
-    let app_config = AppConfig::from_file(AppConfig::default_path(&app_dir).to_str().unwrap())
-        .expect("Failed to load config file");
+    // 获取配置文件路径（不存在就创建）
+    let config_path = common::config::get_init_config();
+    let app_config = AppConfig::from_file(&config_path.to_str().unwrap())?;
 
     // 用于存储所有后台任务的句柄
     let mut handles: Vec<JoinHandle<()>> = Vec::new();
@@ -32,26 +29,11 @@ async fn main() -> Result<()> {
     let web_server_config = app_config.get_server();
     let enable_web_server = web_server_config.enable;
 
-    // 获取mqtt配置
-    let mqtt_config = app_config.get_mqtt();
-    let enable_mqtt = mqtt_config.enable;
-
     if enable_web_server {
-        println!("启动web服务...");
         let config = web_server_config.clone();
         // spawn 返回 JoinHandle，将其存入向量
         let handle = tokio::spawn(async move {
             start_web_server(&config).await;
-        });
-        handles.push(handle);
-    }
-
-    if enable_mqtt {
-        println!("启动MQTT服务...");
-        let config = mqtt_config.clone();
-        // 修复：将 MQTT 任务也放入后台管理，以便统一控制生命周期
-        let handle = tokio::spawn(async move {
-            let _ = start_mqtt(&config).await;
         });
         handles.push(handle);
     }

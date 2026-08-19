@@ -1,0 +1,5 @@
+[jobs.gateway]   # 任务名称可自定义
+command = ["cargo", "run","-p", "gateway"]
+need_stdout = true
+background = false                # 标记为前台程序
+on_change_strategy = "kill_then_restart"  # 变化时重启

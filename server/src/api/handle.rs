@@ -1,9 +1,9 @@
 use crate::common::app::get_app_dir;
 use crate::common::config::AppConfig;
-use crate::system;
+use crate::system_control;
 use axum::{extract::Json, http::StatusCode};
 use serde::Deserialize;
-use system::operate::{execute_reboot, execute_shutdown, get_system_info_json};
+use system_control::operate::{execute_reboot, execute_shutdown, get_system_info_json};
 
 #[derive(Deserialize)]
 pub struct ShutdownRequest {

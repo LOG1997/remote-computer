@@ -1,5 +1,5 @@
 [web_server]
-enable = false
+enable = true
 https = false
 port = 52011
 host = "127.0.0.1"

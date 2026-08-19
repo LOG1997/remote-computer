@@ -5,7 +5,7 @@ use crate::app::mqtt_ha::discover_mqtt::{
     generate_control_online_status_payload, generate_launch_app_payload, merge_ha_configs,
 };
 use crate::common::config::MqttConfig;
-use crate::system::operate::{get_system_info_json, launch_app};
+use crate::system_control::operate::{get_system_info_json, launch_app};
 use rumqttc::{AsyncClient, Event, MqttOptions, Packet, QoS, SubscribeFilter};
 use std::time::Duration;
 
