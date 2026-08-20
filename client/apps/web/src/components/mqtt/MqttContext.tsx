@@ -109,7 +109,7 @@ export function MqttProvider({ children }: { children: ReactNode }) {
         return () => {
             if (mqttClient) mqttClient.end();
         };
-    }, [configData]); // 配置变化 → 自动重连
+    }, []); // 配置变化 → 自动重连
 
     // 订阅
     const subscribe = (topic: string) => {

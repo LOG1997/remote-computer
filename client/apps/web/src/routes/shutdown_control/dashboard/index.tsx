@@ -9,6 +9,9 @@ import MemoryCard from "./components/MemoryCard/-index"
 import StatusCard from "./components/StatusCard/-index"
 import { useEffect } from 'react'
 import { LeftHeader } from './Header/-left'
+import { useWebSocket } from '@/components/WebsocketProvider';
+import { useState } from 'react'
+import {Button} from '@workspace/ui/components/button'
 
 export const Route = createFileRoute('/shutdown_control/dashboard/')({
     component: Dashboard,
@@ -26,51 +29,71 @@ export const Route = createFileRoute('/shutdown_control/dashboard/')({
     },
 })
 function Dashboard() {
-    const configData = useConfigurationStore((state) => state.config)
-    const { protocol } = window.location
-    const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
-    const { data: statusData, isSuccess: statusSuccess } = useQuery({
-        queryKey: ['deviceStatus', baseUrl],
-        queryFn: async () => {
-            if (!baseUrl) throw new Error("No URL provided")
-            const response = await getDeviceStatus({ config: { baseUrl } })
-            return response
-        },
-        // 只有当 queryUrl 存在时才启用查询
-        enabled: !!baseUrl,
-        // 可选：配置重试次数等
-        retry: 1,
-        refetchInterval: 5000
-    })
-    const { data: deviceData, isLoading, refetch: refetchDeviceInfo, isSuccess: isDeviceInfoSuccess } = useQuery({
-        queryKey: ['deviceInfo', baseUrl],
-        queryFn: async () => {
-            if (!baseUrl) throw new Error("No URL provided")
-            const response = await getDeviceInfo({ config: { baseUrl } })
-            console.log('response:', response);
-            return response.data
-        },
-        // 只有当 queryUrl 存在时才启用查询
-        enabled: !!baseUrl,
-        // 可选：配置重试次数等
-        retry: 1,
-        refetchInterval: (query) => {
-            return query.state.error ? false : 5000;
-        },
-    })
+  const configData = useConfigurationStore((state) => state.config)
+  const { sendMessage, subscribe, readyState } = useWebSocket();
+   const [messages, setMessages] = useState<string[]>([]);
+   const [input, setInput] = useState('');
 
-    useEffect(() => {
-        if (statusSuccess) {
-            refetchDeviceInfo()
-        }
-    }, [statusSuccess])
+   useEffect(() => {
+     // 订阅 'chat' 类型的消息
+     const unsubscribe = subscribe((data) => {
+       setMessages((prev) => [...prev, String(data)]);
+     }, 'get_system_info');
+
+     return unsubscribe; // 组件卸载时自动取消订阅
+   }, [subscribe]);
+
+   const handleSend = () => {
+     if (input.trim()) {
+       sendMessage({ type: 'get_system_info', data: input });
+       setInput('');
+     }
+   };
+    // const { protocol } = window.location
+    // const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
+    // const { data: statusData, isSuccess: statusSuccess } = useQuery({
+    //     queryKey: ['deviceStatus', baseUrl],
+    //     queryFn: async () => {
+    //         if (!baseUrl) throw new Error("No URL provided")
+    //         const response = await getDeviceStatus({ config: { baseUrl } })
+    //         return response
+    //     },
+    //     // 只有当 queryUrl 存在时才启用查询
+    //     enabled: !!baseUrl,
+    //     // 可选：配置重试次数等
+    //     retry: 1,
+    //     refetchInterval: 5000
+    // })
+    // const { data: deviceData, isLoading, refetch: refetchDeviceInfo, isSuccess: isDeviceInfoSuccess } = useQuery({
+    //     queryKey: ['deviceInfo', baseUrl],
+    //     queryFn: async () => {
+    //         if (!baseUrl) throw new Error("No URL provided")
+    //         const response = await getDeviceInfo({ config: { baseUrl } })
+    //         console.log('response:', response);
+    //         return response.data
+    //     },
+    //     // 只有当 queryUrl 存在时才启用查询
+    //     enabled: !!baseUrl,
+    //     // 可选：配置重试次数等
+    //     retry: 1,
+    //     refetchInterval: (query) => {
+    //         return query.state.error ? false : 5000;
+    //     },
+    // })
+
+    // useEffect(() => {
+    //     if (statusSuccess) {
+    //         refetchDeviceInfo()
+    //     }
+    // }, [statusSuccess])
 
     return (
-        <div className='flex flex-col gap-8'>
-            <StatusCard data={statusSuccess && statusData?.success} isLoading={isLoading} className='h-18' />
+      <div className='flex flex-col gap-8'>
+            <Button onClick={handleSend}>fasong</Button>
+            {/*<StatusCard data={statusSuccess && statusData?.success} isLoading={isLoading} className='h-18' />
             <OsCard data={isDeviceInfoSuccess ? deviceData?.os : null} isLoading={isLoading} className='h-32' />
             <CpuCard data={isDeviceInfoSuccess ? deviceData?.cpu : null} isLoading={isLoading} className='h-42' />
-            <MemoryCard data={isDeviceInfoSuccess ? deviceData?.memory : null} isLoading={isLoading} className='h-40' />
+            <MemoryCard data={isDeviceInfoSuccess ? deviceData?.memory : null} isLoading={isLoading} className='h-40' />*/}
         </div>
     )
 }
