@@ -2,7 +2,7 @@ use anyhow::Result;
 use axum::{
     Json,
     extract::{
-        ConnectInfo, Query,
+        ConnectInfo, Query, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     response::Response,
@@ -13,12 +13,12 @@ use futures_util::{
     stream::{SplitSink, SplitStream, StreamExt},
 };
 use http::HeaderMap;
-use rustls::crypto::cipher::NONCE_LEN;
-use serde::de::value;
 use serde_json::{Map, Value, json};
 
 use crate::{
-    common::models::{MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth},
+    common::models::{
+        AppState, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth, SecurityConfig,
+    },
     system_control::{
         info::get_system_info_json,
         operate::{execute_reboot, execute_shutdown},
@@ -26,21 +26,24 @@ use crate::{
 };
 
 pub async fn user_service_handler(
+    State(app_state): State<AppState>,
     ws: WebSocketUpgrade,
     headers: HeaderMap,
     Query(token): Query<QueryAuth>,
 ) -> Response {
     println!("开始websocket连接");
-    ws.on_upgrade(handle_socket)
+    ws.on_upgrade(|socket| handle_socket(socket, app_state))
 }
 
-async fn handle_socket(socket: WebSocket) {
+async fn handle_socket(socket: WebSocket, state: AppState) {
+    let config = state.config;
+    let security_config = config.security;
     let (mut sender, mut receiver) = socket.split();
     tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
             match msg {
                 Message::Text(text) => {
-                    let json_msg = handle_msg(text.as_str()).await;
+                    let json_msg = handle_msg(text.as_str(), security_config.clone()).await;
                     let message_text = serde_json::to_string(&json_msg).unwrap_or_default();
                     sender.send(Message::Text(message_text.into())).await.ok();
                 }
@@ -58,7 +61,7 @@ async fn handle_socket(socket: WebSocket) {
     .ok();
 }
 
-async fn handle_msg(text: &str) -> MsgRspModel<Value> {
+async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<Value> {
     let req = match parse_message(text) {
         Ok(value) => value,
         Err(e) => {
@@ -68,41 +71,74 @@ async fn handle_msg(text: &str) -> MsgRspModel<Value> {
     let topic = req.topic;
     let command = req.command;
     match topic {
-        MsgType::SystemControl => {
-            println!("is systemcontrol");
-            match command {
-                Some(value) => {
-                    let command_type = value.command_type;
-                    let command_param = value.param;
-                    match command_type.as_str() {
-                        "shutdown" | "reboot" => {
-                            let immediate: bool = match command_param {
-                                None => false,
-                                Some(ParamValue::Bool(b)) => b,
-                                Some(_) => {
-                                    return MsgRspModel::error(
-                                        MsgType::Error,
-                                        Some("param请输入bool值".to_string()),
-                                    );
+        MsgType::SystemControl => match command {
+            Some(value) => {
+                let command_type = value.command_type;
+                let command_param = value.param;
+                println!("papapspdpasp is {command_param:?}");
+                match command_type.as_str() {
+                    "shutdown" | "reboot" => {
+                        let immediate = match command_param {
+                            None => false,
+                            Some(Value::Object(b)) => {
+                                println!("b isisisis:{b:?}");
+                                let psd = b.get("password");
+                                let imt = b.get("immediate");
+
+                                match psd {
+                                    Some(psd_value) => {
+                                        println!(
+                                            "asssssss {:?} \n {:?}",
+                                            security_config.shutdown_key,
+                                            psd_value.to_owned()
+                                        );
+                                        if security_config.shutdown_key != psd_value.to_owned() {
+                                            return MsgRspModel::error(
+                                                MsgType::Error,
+                                                Some("密码错误".to_string()),
+                                            );
+                                        }
+                                    }
+                                    None => {
+                                        return MsgRspModel::error(
+                                            MsgType::Error,
+                                            Some("没输入密码".to_string()),
+                                        );
+                                    }
                                 }
-                            };
-                            if command_type == "shutdown" {
-                                execute_shutdown(immediate);
+                                match imt {
+                                    Some(imt_value) => {
+                                        if let Some(imt_bool) = imt_value.as_bool() {
+                                            imt_bool
+                                        } else {
+                                            false
+                                        }
+                                    }
+                                    None => false,
+                                }
                             }
-                            if command_type == "reboot" {
-                                execute_reboot(immediate);
+                            Some(_) => {
+                                return MsgRspModel::error(
+                                    MsgType::Error,
+                                    Some("param请输入bool值".to_string()),
+                                );
                             }
-                            println!("关机和重启命令：{immediate:?}");
-                            todo!("关机和重启命令")
+                        };
+                        if command_type == "shutdown" {
+                            execute_shutdown(immediate);
                         }
-                        _ => {
-                            println!("nnn");
+                        if command_type == "reboot" {
+                            execute_reboot(immediate);
                         }
-                    };
-                }
-                None => {}
+                        println!("关机和重启命令：{immediate:?}");
+                    }
+                    _ => {
+                        println!("nnn");
+                    }
+                };
             }
-        }
+            None => {}
+        },
         MsgType::GetSystemInfo => match command {
             Some(value) => {
                 let command_type = value.command_type;
@@ -134,7 +170,7 @@ async fn handle_msg(text: &str) -> MsgRspModel<Value> {
                                     Some("请输入需要启动的app名称".to_string()),
                                 );
                             }
-                            Some(ParamValue::String(s)) => s,
+                            Some(Value::String(s)) => s,
                             Some(_) => {
                                 return MsgRspModel::error(
                                     MsgType::Error,
@@ -153,7 +189,7 @@ async fn handle_msg(text: &str) -> MsgRspModel<Value> {
                                     Some("请输入需要退出的app名称".to_string()),
                                 );
                             }
-                            Some(ParamValue::String(s)) => s,
+                            Some(Value::String(s)) => s,
                             Some(_) => {
                                 return MsgRspModel::error(
                                     MsgType::Error,

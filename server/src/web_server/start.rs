@@ -3,7 +3,7 @@ use std::net::SocketAddr;
 use crate::{
     common::{
         config::get_root_dir,
-        models::{AppState, WebServerConfig},
+        models::{AppConfig, AppState, WebServerConfig},
     },
     system_control::control_volume::VolumeControl,
     web_server::{
@@ -19,7 +19,7 @@ use tower_http::{
     services::ServeDir,
 };
 
-pub async fn start_web_server(config: &WebServerConfig) -> Result<()> {
+pub async fn start_web_server(config: AppConfig) -> Result<()> {
     let is_dev = cfg!(debug_assertions);
     let root_dir = get_root_dir();
 
@@ -34,16 +34,23 @@ pub async fn start_web_server(config: &WebServerConfig) -> Result<()> {
     if !static_files_root.exists() {
         panic!("static web html files not found");
     }
+
+    let app_state = AppState {
+        config: config.clone(),
+    };
+
     // 如果访问 / (根路径)，ServeDir 默认会尝试查找 index.html (取决于配置，通常需确保存在)
     let static_files_service =
         ServeDir::new(&static_files_root).append_index_html_on_directories(true); // 关键：访问目录时自动返回 index.html
+    let web_server_config = config.get_server();
 
     // 服务地址
-    let server_address = format!("{}:{}", config.host, config.port);
+    let server_address = format!("{}:{}", web_server_config.host, web_server_config.port);
     let app = Router::new()
         .route("/user", any(user_service_handler))
         .route("/browser", any(browser_service_handler))
         .fallback_service(static_files_service)
+        .with_state(app_state)
         .layer(tower_http::cors::CorsLayer::permissive());
     println!("启动web服务:http://{}", server_address);
 

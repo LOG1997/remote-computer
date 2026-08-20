@@ -8,9 +8,9 @@ use serde_json::Value;
 
 use crate::system_control::control_volume::VolumeControl;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AppState {
-    pub audio_state: VolumeControl,
+    pub config: AppConfig,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -36,7 +36,7 @@ pub enum ParamValue {
 pub struct CommandType {
     /// 命令类型
     pub command_type: String,
-    pub param: Option<ParamValue>,
+    pub param: Option<Value>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -55,7 +55,7 @@ pub struct MsgReqModel {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MsgRspModel<T> {
     /// 消息类型，与req里面的消息类型相同
-    pub msg_type: MsgType,
+    pub topic: MsgType,
     /// 用于验证这条消息的真实性，用于客户端验证
     pub token: String,
     /// 返回数据，以json形式表示
@@ -71,9 +71,9 @@ pub struct MsgRspModel<T> {
 }
 
 impl<T> MsgRspModel<T> {
-    pub fn success(msg_type: MsgType, data: T, msg: Option<String>) -> Self {
+    pub fn success(topic: MsgType, data: T, msg: Option<String>) -> Self {
         Self {
-            msg_type,
+            topic,
             token: String::new(),
             data: Some(data),
             code: 0,
@@ -82,9 +82,9 @@ impl<T> MsgRspModel<T> {
             date_time: DateTime::default(),
         }
     }
-    pub fn error(msg_type: MsgType, msg: Option<String>) -> Self {
+    pub fn error(topic: MsgType, msg: Option<String>) -> Self {
         Self {
-            msg_type,
+            topic,
             token: String::new(),
             data: None,
             code: -1,

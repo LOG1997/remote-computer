@@ -31,13 +31,13 @@ async fn main() -> Result<()> {
     // 获取web服务配置
     let web_server_config = app_config.get_server();
     let enable_web_server = web_server_config.enable;
+    // 安全配置
 
-    // 音频设置相关
     if enable_web_server {
-        let config = web_server_config.clone();
+        let config = app_config;
         // // spawn 返回 JoinHandle，将其存入向量
         // let handle = tokio::spawn(async move {
-        start_web_server(&config).await?;
+        start_web_server(config.clone()).await?;
         //     });
         //     handles.push(handle);
     }

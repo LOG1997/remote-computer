@@ -2,7 +2,7 @@
 enable = true
 https = false
 port = 52011
-host = "127.0.0.1"
+host = "0.0.0.0"
 
 [mqtt]
 enable = true

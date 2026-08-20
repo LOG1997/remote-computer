@@ -1,99 +1,97 @@
-
-import { createFileRoute } from '@tanstack/react-router'
-import { useQuery } from "@tanstack/react-query"
-import { getDeviceStatus, getDeviceInfo } from '@/apis'
-import { useConfigurationStore } from '@/stores'
+import { createFileRoute } from "@tanstack/react-router"
 import OsCard from "./components/OsCard/-index"
 import CpuCard from "./components/CpuCard/-index"
 import MemoryCard from "./components/MemoryCard/-index"
 import StatusCard from "./components/StatusCard/-index"
-import { useEffect } from 'react'
-import { LeftHeader } from './Header/-left'
-import { useWebSocket } from '@/components/WebsocketProvider';
-import { useState } from 'react'
-import {Button} from '@workspace/ui/components/button'
+import { useEffect } from "react"
+import { LeftHeader } from "./Header/-left"
+import { useWebSocket } from "@/components/WebsocketProvider"
+import { useState } from "react"
 
-export const Route = createFileRoute('/shutdown_control/dashboard/')({
+export const Route = createFileRoute("/shutdown_control/dashboard/")({
     component: Dashboard,
     loader: async () => {
-
         return {
             meta: {
-                back: '/shutdown_control/config',
-                backName: '去配置',
+                back: "/shutdown_control/config",
+                backName: "去配置",
             },
             header: {
-                left: <LeftHeader />
-            }
+                left: <LeftHeader />,
+            },
         }
     },
 })
 function Dashboard() {
-  const configData = useConfigurationStore((state) => state.config)
-  const { sendMessage, subscribe, readyState } = useWebSocket();
-   const [messages, setMessages] = useState<string[]>([]);
-   const [input, setInput] = useState('');
+    const { sendMessage, subscribe, readyState } = useWebSocket()
+    const [isLoading, setIsLoading] = useState(true)
+    const [statusData, setStatusData] = useState(false)
+    const [deviceData, setDeviceData] = useState({
+        os: undefined,
+        cpu: undefined,
+        memory: undefined,
+    })
 
-   useEffect(() => {
-     // 订阅 'chat' 类型的消息
-     const unsubscribe = subscribe((data) => {
-       setMessages((prev) => [...prev, String(data)]);
-     }, 'get_system_info');
+    useEffect(() => {
+        // 订阅 'get_system_info' 类型的消息
+        const unsubscribe = subscribe((data: any) => {
+            setIsLoading(false)
+            setStatusData(true)
+            console.log("收到消息", data)
+            setDeviceData(data)
+        }, "GetSystemInfo")
 
-     return unsubscribe; // 组件卸载时自动取消订阅
-   }, [subscribe]);
+        return unsubscribe // 组件卸载时自动取消订阅
+    }, [subscribe])
 
-   const handleSend = () => {
-     if (input.trim()) {
-       sendMessage({ type: 'get_system_info', data: input });
-       setInput('');
-     }
-   };
-    // const { protocol } = window.location
-    // const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
-    // const { data: statusData, isSuccess: statusSuccess } = useQuery({
-    //     queryKey: ['deviceStatus', baseUrl],
-    //     queryFn: async () => {
-    //         if (!baseUrl) throw new Error("No URL provided")
-    //         const response = await getDeviceStatus({ config: { baseUrl } })
-    //         return response
-    //     },
-    //     // 只有当 queryUrl 存在时才启用查询
-    //     enabled: !!baseUrl,
-    //     // 可选：配置重试次数等
-    //     retry: 1,
-    //     refetchInterval: 5000
-    // })
-    // const { data: deviceData, isLoading, refetch: refetchDeviceInfo, isSuccess: isDeviceInfoSuccess } = useQuery({
-    //     queryKey: ['deviceInfo', baseUrl],
-    //     queryFn: async () => {
-    //         if (!baseUrl) throw new Error("No URL provided")
-    //         const response = await getDeviceInfo({ config: { baseUrl } })
-    //         console.log('response:', response);
-    //         return response.data
-    //     },
-    //     // 只有当 queryUrl 存在时才启用查询
-    //     enabled: !!baseUrl,
-    //     // 可选：配置重试次数等
-    //     retry: 1,
-    //     refetchInterval: (query) => {
-    //         return query.state.error ? false : 5000;
-    //     },
-    // })
-
-    // useEffect(() => {
-    //     if (statusSuccess) {
-    //         refetchDeviceInfo()
-    //     }
-    // }, [statusSuccess])
+    useEffect(() => {
+        sendMessage({
+            topic: "GetSystemInfo",
+            token: "1231212",
+            date_time: new Date().getTime(),
+            command: {
+                command_type: "get_system_info",
+            },
+        })
+        let timer = setInterval(() => {
+            sendMessage({
+                topic: "GetSystemInfo",
+                token: "1231212",
+                date_time: new Date().getTime(),
+                command: {
+                    command_type: "get_system_info",
+                },
+            })
+        }, 10000)
+        return () => {
+            if (timer) {
+                clearInterval(timer)
+            }
+        }
+    }, [])
 
     return (
-      <div className='flex flex-col gap-8'>
-            <Button onClick={handleSend}>fasong</Button>
-            {/*<StatusCard data={statusSuccess && statusData?.success} isLoading={isLoading} className='h-18' />
-            <OsCard data={isDeviceInfoSuccess ? deviceData?.os : null} isLoading={isLoading} className='h-32' />
-            <CpuCard data={isDeviceInfoSuccess ? deviceData?.cpu : null} isLoading={isLoading} className='h-42' />
-            <MemoryCard data={isDeviceInfoSuccess ? deviceData?.memory : null} isLoading={isLoading} className='h-40' />*/}
+        <div className="flex flex-col gap-8">
+            <StatusCard
+                data={readyState === WebSocket.OPEN && statusData}
+                isLoading={isLoading}
+                className="h-18"
+            />
+            <OsCard
+                data={readyState === WebSocket.OPEN ? deviceData.os : undefined}
+                isLoading={isLoading}
+                className="h-32"
+            />
+            <CpuCard
+                data={readyState === WebSocket.OPEN ? deviceData?.cpu : undefined}
+                isLoading={isLoading}
+                className="h-42"
+            />
+            <MemoryCard
+                data={readyState === WebSocket.OPEN ? deviceData?.memory : undefined}
+                isLoading={isLoading}
+                className="h-40"
+            />
         </div>
     )
 }

@@ -20,21 +20,18 @@ import { useForm } from "@tanstack/react-form"
 import { toast } from "sonner"
 
 interface Props {
-    mode: 'reboot' | 'shutdown';
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    handleSubmit: (values: { password: string, immediate: boolean }) => void;
+    mode: "reboot" | "shutdown"
+    open: boolean
+    setOpen: (open: boolean) => void
+    handleSubmit: (values: { password: string; immediate: boolean }) => void
 }
 const formSchema = z.object({
-    password: z
-        .string()
-        .min(1, "密码不能为空"),
+    password: z.string().min(1, "密码不能为空"),
     immediate: z.boolean(),
-
 })
 export default function ShutDownDialog(props: Props) {
-
-    const { open, setOpen, mode = 'shutdown', handleSubmit } = props; const form = useForm({
+    const { open, setOpen, mode = "shutdown", handleSubmit } = props
+    const form = useForm({
         defaultValues: {
             password: "",
             immediate: true,
@@ -52,16 +49,19 @@ export default function ShutDownDialog(props: Props) {
             return
         }
         const formValues = form.state.values
-        console.log('fommmra:', formValues)
+        console.log("fommmra:", formValues)
         handleSubmit(formValues)
     }
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>{mode === 'reboot' ? '重启' : '关机'}安全确认</DialogTitle>
+                    <DialogTitle>
+                        {mode === "reboot" ? "重启" : "关机"}安全确认
+                    </DialogTitle>
                     <DialogDescription>
-                        为了安全起见，请输入操作密码以确认{mode === 'reboot' ? '重启' : '关机'}。
+                        为了安全起见，请输入操作密码以确认
+                        {mode === "reboot" ? "重启" : "关机"}。
                     </DialogDescription>
                 </DialogHeader>
                 <form
@@ -113,11 +113,10 @@ export default function ShutDownDialog(props: Props) {
                                         />
                                         <label
                                             htmlFor={field.name}
-                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                         >
                                             立即执行
                                         </label>
-
                                     </div>
                                 )
                             }}

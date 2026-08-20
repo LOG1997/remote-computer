@@ -5,12 +5,10 @@ import {
 import { Spinner } from "@workspace/ui/components/spinner"
 import { Button } from "@workspace/ui/components/button"
 import { Dot } from "lucide-react"
-import { useMutation } from '@tanstack/react-query'
 import ShutdownDialog from './-ShutDownDialog'
 import { useState } from "react"
-import { useConfigurationStore } from '@/stores'
-import { sendShutDownCommand, sendRebootCommand } from '@/apis'
-import { toast } from "sonner"
+import { useWebSocket } from "@/components/WebsocketProvider"
+import { useEffect } from 'react'
 interface OsProps {
     data: boolean,
     isLoading: boolean,
@@ -21,54 +19,43 @@ export default function OsCard(props: OsProps) {
     const [dialogOpen, setDialogOpen] = useState(false)
     const [mode, setMode] = useState<"shutdown" | "reboot">("shutdown")
 
-    const configData = useConfigurationStore((state) => state.config)
-    const { protocol } = window.location
-    const baseUrl = protocol + "//" + configData?.host + ":" + configData?.port
-    const mutationShutdown = useMutation({
-        mutationKey: ["setCommand"],
-        mutationFn: async (params: { key: string, immediate: boolean }) => {
-            if (!baseUrl) throw new Error("No URL provided")
-            const response = await sendShutDownCommand({ config: { baseUrl }, data: params })
-            return response
-        },
-    })
-    const mutationReboot = useMutation({
-        mutationKey: ["setCommand"],
-        mutationFn: async (params: { key: string, immediate: boolean }) => {
-            if (!baseUrl) throw new Error("No URL provided")
-            const response = await sendRebootCommand({ config: { baseUrl }, data: params })
-            return response
-        },
-    })
+    const { sendMessage, subscribe } = useWebSocket()
+
+    useEffect(() => {
+        // 订阅 'get_system_info' 类型的消息
+        const unsubscribe = subscribe((data: any) => {
+            console.log("收到关机消息", data)
+        }, "SystemControl")
+
+        return unsubscribe // 组件卸载时自动取消订阅
+    }, [subscribe])
+    const triggerUpdate = (mode: String, param: { password: String, immediate: boolean }) => {
+        sendMessage({
+            topic: "SystemControl",
+            token: "1231212",
+            date_time: new Date().getTime(),
+            command: {
+                command_type: mode,
+                param
+            },
+        })
+    }
+
     const openDialog = (mode: 'reboot' | 'shutdown') => {
         setDialogOpen(true)
         setMode(mode)
     }
     const handleConfirmShutdown = (values: { password: string, immediate: boolean }) => {
         setDialogOpen(false)
-        const params = {
-            key: values.password,
+        let param = {
+            password: values.password,
             immediate: values.immediate
         }
         if (mode === 'reboot') {
-            mutationReboot.mutateAsync(params).then(res => {
-                console.log("res", res)
-                if (!res.success) {
-                    toast.error(res.msg || '重启命令失败')
-                }
-            }).catch(err => {
-                console.log('errr;', err)
-            })
+            triggerUpdate("reboot", param)
         }
         else {
-            mutationShutdown.mutateAsync(params).then(res => {
-                console.log("res", res)
-                if (!res.success) {
-                    toast.error(res.msg || '关机失败')
-                }
-            }).catch(err => {
-                console.log('errr;', err)
-            })
+            triggerUpdate("shutdown", param)
         }
 
     }
