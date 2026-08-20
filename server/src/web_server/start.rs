@@ -1,13 +1,23 @@
+use std::net::SocketAddr;
+
 use crate::{
-    common::{config::get_root_dir, models::WebServerConfig},
+    common::{
+        config::get_root_dir,
+        models::{AppState, WebServerConfig},
+    },
+    system_control::control_volume::VolumeControl,
     web_server::{
         self, browser_service::browser_service_handler, user_service::user_service_handler,
     },
 };
 use anyhow::Result;
 use axum::{Router, routing::any};
+use http::Method;
 use tokio::net::TcpListener;
-use tower_http::services::ServeDir;
+use tower_http::{
+    cors::{Any, CorsLayer},
+    services::ServeDir,
+};
 
 pub async fn start_web_server(config: &WebServerConfig) -> Result<()> {
     let is_dev = cfg!(debug_assertions);
@@ -19,6 +29,7 @@ pub async fn start_web_server(config: &WebServerConfig) -> Result<()> {
     } else {
         root_dir.join("web")
     };
+
     // dev的模式下检查dist目录，否则检查web目录，不存在直接报错
     if !static_files_root.exists() {
         panic!("static web html files not found");
@@ -34,7 +45,6 @@ pub async fn start_web_server(config: &WebServerConfig) -> Result<()> {
         .route("/browser", any(browser_service_handler))
         .fallback_service(static_files_service)
         .layer(tower_http::cors::CorsLayer::permissive());
-
     println!("启动web服务:http://{}", server_address);
 
     let listener = TcpListener::bind(server_address).await?;

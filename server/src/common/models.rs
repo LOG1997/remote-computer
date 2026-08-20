@@ -1,29 +1,55 @@
 use anyhow::Result;
 use std::path::PathBuf;
+use volumecontrol::AudioDevice;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
+use crate::system_control::control_volume::VolumeControl;
+
+#[derive(Debug)]
+pub struct AppState {
+    pub audio_state: VolumeControl,
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum MsgType {
     LaunchApp,
-    SysteControl,
+    SystemControl,
+    GetSystemInfo,
+    GetVolume,
     BrowserControl,
     Ping,
+    Error,
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum ParamValue {
+    String(String),
+    Bool(bool),
+    U64(u64),
+    // 如果需要支持浮点数，可以加 F64(f64)
+}
+#[derive(Debug, Clone, Deserialize, Serialize)]
+/// 命令主体格式
+pub struct CommandType {
+    /// 命令类型
+    pub command_type: String,
+    pub param: Option<ParamValue>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 /// 限制websocket由客户端到服务的消息格式
 pub struct MsgReqModel {
     /// 消息类型
-    pub msg_type: MsgType,
+    pub topic: MsgType,
     /// 用于验证这条消息的真实性，用于服务验证
     pub token: String,
-    /// 命令，以json形式传递，方便读取，取Option类型，是因为ping消息可能不需要带command
-    pub command: Option<Value>,
+    /// 命令，以string形式传递，方便读取，有参数以空格分隔开，取Option类型，是因为ping消息可能不需要带command
+    pub command: Option<CommandType>,
     /// 发送时间，以字符串形式表示
-    pub date_time: String,
+    pub date_time: i64,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

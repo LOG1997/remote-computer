@@ -1,6 +1,7 @@
 use anyhow::Result;
 use volumecontrol::AudioDevice;
 
+#[derive(Debug)]
 pub struct VolumeControl {
     pub device: AudioDevice,
 }
