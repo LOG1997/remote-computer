@@ -14,6 +14,9 @@ use crate::{
     system_control::control_volume::{AudioControl, VolumeControl},
     web_server::start::start_web_server,
 };
+use include_dir::{Dir, include_dir};
+
+static WEB_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/web");
 
 #[tokio::main]
 async fn main() -> Result<()> {

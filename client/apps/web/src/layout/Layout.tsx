@@ -12,13 +12,14 @@ export default function Layout() {
     useEffect(() => {
         // 订阅 'get_system_info' 类型的消息
         const unsubscribe = subscribe((data: any) => {
-            console.log("收到错误消息", data)
             let errMsg = data.msg;
             toast.error(errMsg || "出错了")
         }, "Error")
 
         return unsubscribe // 组件卸载时自动取消订阅
     }, [subscribe])
+
+
     return (
         <>
             <ThemeProvider>

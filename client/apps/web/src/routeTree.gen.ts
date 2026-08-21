@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as Ws_configIndexRouteImport } from './routes/ws_config/index'
 import { Route as Video_controlIndexRouteImport } from './routes/video_control/index'
 import { Route as Shutdown_controlIndexRouteImport } from './routes/shutdown_control/index'
 import { Route as Mqtt_configIndexRouteImport } from './routes/mqtt_config/index'
@@ -23,6 +24,11 @@ import { Route as Shutdown_controlConfigIndexRouteImport } from './routes/shutdo
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const Ws_configIndexRoute = Ws_configIndexRouteImport.update({
+  id: '/ws_config/',
+  path: '/ws_config/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const Video_controlIndexRoute = Video_controlIndexRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/mqtt_config/': typeof Mqtt_configIndexRoute
   '/shutdown_control/': typeof Shutdown_controlIndexRoute
   '/video_control/': typeof Video_controlIndexRoute
+  '/ws_config/': typeof Ws_configIndexRoute
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByTo {
   '/mqtt_config': typeof Mqtt_configIndexRoute
   '/shutdown_control': typeof Shutdown_controlIndexRoute
   '/video_control': typeof Video_controlIndexRoute
+  '/ws_config': typeof Ws_configIndexRoute
   '/shutdown_control/config': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili': typeof Video_controlBilibiliIndexRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/mqtt_config/': typeof Mqtt_configIndexRoute
   '/shutdown_control/': typeof Shutdown_controlIndexRoute
   '/video_control/': typeof Video_controlIndexRoute
+  '/ws_config/': typeof Ws_configIndexRoute
   '/shutdown_control/config/': typeof Shutdown_controlConfigIndexRoute
   '/shutdown_control/dashboard/': typeof Shutdown_controlDashboardIndexRoute
   '/video_control/bilibili/': typeof Video_controlBilibiliIndexRoute
@@ -121,6 +130,7 @@ export interface FileRouteTypes {
     | '/mqtt_config/'
     | '/shutdown_control/'
     | '/video_control/'
+    | '/ws_config/'
     | '/shutdown_control/config/'
     | '/shutdown_control/dashboard/'
     | '/video_control/bilibili/'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/mqtt_config'
     | '/shutdown_control'
     | '/video_control'
+    | '/ws_config'
     | '/shutdown_control/config'
     | '/shutdown_control/dashboard'
     | '/video_control/bilibili'
@@ -145,6 +156,7 @@ export interface FileRouteTypes {
     | '/mqtt_config/'
     | '/shutdown_control/'
     | '/video_control/'
+    | '/ws_config/'
     | '/shutdown_control/config/'
     | '/shutdown_control/dashboard/'
     | '/video_control/bilibili/'
@@ -158,6 +170,7 @@ export interface RootRouteChildren {
   Mqtt_configIndexRoute: typeof Mqtt_configIndexRoute
   Shutdown_controlIndexRoute: typeof Shutdown_controlIndexRoute
   Video_controlIndexRoute: typeof Video_controlIndexRoute
+  Ws_configIndexRoute: typeof Ws_configIndexRoute
   Shutdown_controlConfigIndexRoute: typeof Shutdown_controlConfigIndexRoute
   Shutdown_controlDashboardIndexRoute: typeof Shutdown_controlDashboardIndexRoute
   Video_controlBilibiliIndexRoute: typeof Video_controlBilibiliIndexRoute
@@ -171,6 +184,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ws_config/': {
+      id: '/ws_config/'
+      path: '/ws_config'
+      fullPath: '/ws_config/'
+      preLoaderRoute: typeof Ws_configIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/video_control/': {
@@ -246,6 +266,7 @@ const rootRouteChildren: RootRouteChildren = {
   Mqtt_configIndexRoute: Mqtt_configIndexRoute,
   Shutdown_controlIndexRoute: Shutdown_controlIndexRoute,
   Video_controlIndexRoute: Video_controlIndexRoute,
+  Ws_configIndexRoute: Ws_configIndexRoute,
   Shutdown_controlConfigIndexRoute: Shutdown_controlConfigIndexRoute,
   Shutdown_controlDashboardIndexRoute: Shutdown_controlDashboardIndexRoute,
   Video_controlBilibiliIndexRoute: Video_controlBilibiliIndexRoute,

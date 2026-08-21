@@ -1,4 +1,5 @@
 // websocket/WebSocketProvider.tsx
+import { useWsConfig } from '@/stores';
 import React, {
     createContext,
     useContext,
@@ -32,32 +33,52 @@ export const useWebSocket = () => {
 
 // ---------- Provider 组件 ----------
 interface WebSocketProviderProps {
-    url: string;
     children: ReactNode;
     /** 重连间隔（毫秒），默认 3000 */
     reconnectInterval?: number;
 }
 
 export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
-    url,
     children,
     reconnectInterval = 10000,
 }) => {
+
     const [readyState, setReadyState] = useState<number>(WebSocket.CONNECTING);
     const wsRef = useRef<WebSocket | null>(null);
     const reconnectTimerRef = useRef<number | null>(null);
     // 存储订阅者：{ type: Set<callback> }
     const listenersRef = useRef<Map<string, Set<(data: unknown) => void>>>(new Map());
 
+    const wsConfig = useWsConfig((state) => state.wsConfig);
+    const buildUrl = useCallback(() => {
+        // if (!wsConfig) return ''; // 配置未加载
+        const { host, port, path, securityKey } = wsConfig || {};
+        const finalHost = host || window.location.hostname || '127.0.0.1';
+        const finalPort = port || '52011';
+        const normalizedPath = path?.startsWith('/') ? path : `/user`;
+        const query = securityKey ? `?token=${encodeURIComponent(securityKey)}` : `?token=${1212121}`;
+        const result_url = `ws://${finalHost}:${finalPort}${normalizedPath}${query}`
+        return result_url;
+    }, [wsConfig]);
     // ---------- 建立连接 ----------
     const connect = useCallback(() => {
+        const currentUrl = buildUrl(); // 获取最新的 URL
+        if (!currentUrl) {
+            console.warn('⚠️ WebSocket URL 为空，放弃连接');
+            if (wsRef.current) {
+                wsRef.current.close();
+                wsRef.current = null;
+            }
+            setReadyState(WebSocket.CLOSED);
+            return;
+        }
         // 清除旧连接
         if (wsRef.current) {
             wsRef.current.close();
             wsRef.current = null;
         }
 
-        const ws = new WebSocket(url);
+        const ws = new WebSocket(currentUrl);
         wsRef.current = ws;
 
         ws.onopen = () => {
@@ -82,7 +103,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
         };
 
         ws.onerror = (error) => {
-            console.error('❌ WebSocket 错误', url, error);
+            console.error('❌ WebSocket 错误', currentUrl, error);
         };
 
         ws.onmessage = (event) => {
@@ -110,10 +131,15 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
                 allCallbacks.forEach((cb) => cb(payload));
             }
         };
-    }, [url, reconnectInterval]);
+    }, [buildUrl, reconnectInterval]);
 
     // ---------- 生命周期：挂载时连接，卸载时断开 ----------
     useEffect(() => {
+        const currentUrl = buildUrl();
+        if (!currentUrl) {
+            console.warn('⚠️ WebSocket 未配置 URL，请检查');
+            return
+        }
         connect();
         return () => {
             if (reconnectTimerRef.current) {
@@ -125,7 +151,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
                 wsRef.current = null;
             }
         };
-    }, [connect]);
+    }, [connect, buildUrl]);
 
     // ---------- 发送消息 ----------
     const sendMessage = useCallback((data: unknown) => {
@@ -139,9 +165,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({
 
     // ---------- 订阅 / 取消订阅 ----------
     const subscribe = useCallback((callback: (data: unknown) => void, type = '*') => {
-        console.log("is type", type)
         const listeners = listenersRef.current;
-        console.log("cusus:", listenersRef.current)
         if (!listeners.has(type)) {
             listeners.set(type, new Set());
         }

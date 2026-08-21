@@ -13,7 +13,7 @@ export const Route = createFileRoute("/shutdown_control/dashboard/")({
     loader: async () => {
         return {
             meta: {
-                back: "/shutdown_control/config",
+                back: "/ws_config",
                 backName: "去配置",
             },
             header: {

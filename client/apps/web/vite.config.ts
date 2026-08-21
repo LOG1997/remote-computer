@@ -68,7 +68,7 @@ export default defineConfig({
         },
     },
     build: {
-        outDir: 'dist',
+        outDir: '../../../server/web',
         assetsDir: 'assets',
     },
     preview: {

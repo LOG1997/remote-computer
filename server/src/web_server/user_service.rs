@@ -75,16 +75,13 @@ async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<
             Some(value) => {
                 let command_type = value.command_type;
                 let command_param = value.param;
-                println!("papapspdpasp is {command_param:?}");
                 match command_type.as_str() {
                     "shutdown" | "reboot" => {
                         let immediate = match command_param {
                             None => false,
                             Some(Value::Object(b)) => {
-                                println!("b isisisis:{b:?}");
                                 let psd = b.get("password");
                                 let imt = b.get("immediate");
-
                                 match psd {
                                     Some(psd_value) => {
                                         println!(
@@ -130,7 +127,7 @@ async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<
                         if command_type == "reboot" {
                             execute_reboot(immediate);
                         }
-                        println!("关机和重启命令：{immediate:?}");
+                        println!("关机和重启命令：{command_type:?}");
                     }
                     _ => {
                         println!("nnn");

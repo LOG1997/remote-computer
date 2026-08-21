@@ -35,3 +35,6 @@ home = "0.5.12"
 axum-extra = {version="0.12.6",features=["typed-header"]}
 futures-util = "0.3.34"
 dotenvy = "0.15.7"
+include_dir = "0.7.4"
+tower = "0.5.3"
+mime_guess = "2.0.5"

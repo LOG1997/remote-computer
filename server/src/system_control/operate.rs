@@ -1,7 +1,5 @@
 use crate::system_control::check::launch_app_safe;
-use serde::{Deserialize, Serialize};
 use std::process::Command;
-use sysinfo::{Components, CpuRefreshKind, Disks, System};
 
 pub fn execute_shutdown(immediate: bool) {
     println!("正在执行关机指令...");

@@ -1,3 +1,4 @@
 export * from './useConfiguration'
 export * from './useMqttConfig'
 export * from './usePlatform'
+export * from './useWsConfig'

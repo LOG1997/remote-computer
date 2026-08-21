@@ -11,7 +11,7 @@ interface MemoryProps {
     data: {
         total_memory: string,
         used_memory: string,
-        free_memory: string,
+        available_memory: string,
     } | undefined,
     isLoading: boolean,
     className?: string
@@ -50,7 +50,7 @@ export default function OsCard(props: MemoryProps) {
                                     <p className="text-xs text-muted-foreground">可用</p>
                                 </div>
                                 <div>
-                                    <span className="text-sm font-bold">{data ? (Number(data.free_memory) / (1024 * 1024 * 1024)).toFixed(1) : "--"}</span>
+                                    <span className="text-sm font-bold">{data ? (Number(data.available_memory) / (1024 * 1024 * 1024)).toFixed(1) : "--"}</span>
                                     <span className="text-[0.5rem] self-baseline text-muted-foreground">GB</span>
                                 </div>
                             </div>
