@@ -1,16 +1,26 @@
 use anyhow::Result;
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
+use tokio::sync::{Mutex, mpsc::UnboundedSender, oneshot};
 use volumecontrol::AudioDevice;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::system_control::control_volume::VolumeControl;
-
+#[derive(Debug)]
+pub enum AudioCommand {
+    SetVolume {
+        volume: u8,
+        reply: oneshot::Sender<u8>, // 成功返回实际音量，失败返回错误信息
+    },
+    GetVolume {
+        reply: oneshot::Sender<u8>,
+    },
+}
 #[derive(Debug, Clone)]
 pub struct AppState {
     pub config: AppConfig,
+    pub audio_tx: UnboundedSender<AudioCommand>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -19,6 +29,7 @@ pub enum MsgType {
     SystemControl,
     GetSystemInfo,
     GetVolume,
+    SetVolume,
     BrowserControl,
     Ping,
     Error,

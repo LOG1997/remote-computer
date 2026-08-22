@@ -14,14 +14,16 @@ use futures_util::{
 };
 use http::HeaderMap;
 use serde_json::{Map, Value, json};
+use tokio::sync::{mpsc::UnboundedSender, oneshot};
 
 use crate::{
     common::models::{
-        AppState, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth, SecurityConfig,
+        AppState, AudioCommand, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth,
+        SecurityConfig,
     },
     system_control::{
         info::get_system_info_json,
-        operate::{execute_reboot, execute_shutdown},
+        operate::{execute_reboot, execute_shutdown, launch_app_with_to},
     },
 };
 
@@ -32,10 +34,12 @@ pub async fn user_service_handler(
     Query(token): Query<QueryAuth>,
 ) -> Response {
     println!("开始websocket连接");
+
     ws.on_upgrade(|socket| handle_socket(socket, app_state))
 }
 
 async fn handle_socket(socket: WebSocket, state: AppState) {
+    let audio_tx = state.audio_tx;
     let config = state.config;
     let security_config = config.security;
     let (mut sender, mut receiver) = socket.split();
@@ -43,7 +47,8 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
         while let Some(Ok(msg)) = receiver.next().await {
             match msg {
                 Message::Text(text) => {
-                    let json_msg = handle_msg(text.as_str(), security_config.clone()).await;
+                    let json_msg =
+                        handle_msg(text.as_str(), security_config.clone(), audio_tx.clone()).await;
                     let message_text = serde_json::to_string(&json_msg).unwrap_or_default();
                     sender.send(Message::Text(message_text.into())).await.ok();
                 }
@@ -61,7 +66,11 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
     .ok();
 }
 
-async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<Value> {
+async fn handle_msg(
+    text: &str,
+    security_config: SecurityConfig,
+    audio_tx: UnboundedSender<AudioCommand>,
+) -> MsgRspModel<Value> {
     let req = match parse_message(text) {
         Ok(value) => value,
         Err(e) => {
@@ -139,7 +148,6 @@ async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<
         MsgType::GetSystemInfo => match command {
             Some(value) => {
                 let command_type = value.command_type;
-                let command_param = value.param;
                 match command_type.as_str() {
                     "get_system_info" => {
                         println!("获取系统信息");
@@ -153,7 +161,77 @@ async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<
             }
             None => {}
         },
-        MsgType::GetVolume => {}
+        MsgType::GetVolume => {
+            let (reply_tx, reply_rx) = oneshot::channel::<u8>();
+            let volume_cmd = AudioCommand::GetVolume { reply: reply_tx };
+            if let Err(e) = audio_tx.send(volume_cmd) {
+                return MsgRspModel::error(MsgType::Error, Some(e.to_string()));
+            }
+            let current_volume: i8 =
+                match tokio::time::timeout(std::time::Duration::from_secs(1), reply_rx).await {
+                    Ok(Ok(vol)) => vol as i8,
+                    Ok(Err(_)) => -1,
+                    Err(_) => -1,
+                };
+            if current_volume < 0 {
+                return MsgRspModel::error(MsgType::Error, Some("没有获取到系统音量".to_string()));
+            }
+            let volume_json = json!({"volume":current_volume});
+            return MsgRspModel::success(topic, volume_json, None);
+        }
+        MsgType::SetVolume => match command {
+            Some(value) => {
+                let command_param = value.param;
+
+                match command_param {
+                    Some(new_volume_value) => {
+                        let new_volume_i8 = new_volume_value.as_i64().unwrap_or(-1) as i8;
+                        if new_volume_i8 < 0 {
+                            return MsgRspModel::error(
+                                MsgType::Error,
+                                Some("数据格式化出错，请检查你的传入数据".to_string()),
+                            );
+                        }
+                        let (reply_tx, reply_rx) = oneshot::channel::<u8>();
+                        let volume_cmd = AudioCommand::SetVolume {
+                            volume: new_volume_i8 as u8,
+                            reply: reply_tx,
+                        };
+                        if let Err(e) = audio_tx.send(volume_cmd) {
+                            return MsgRspModel::error(MsgType::Error, Some(e.to_string()));
+                        }
+                        let current_volume: i8 =
+                            match tokio::time::timeout(std::time::Duration::from_secs(1), reply_rx)
+                                .await
+                            {
+                                Ok(Ok(vol)) => vol as i8,
+                                Ok(Err(_)) => -1,
+                                Err(_) => -1,
+                            };
+                        if current_volume < 0 {
+                            return MsgRspModel::error(
+                                MsgType::Error,
+                                Some("没有获取到系统音量".to_string()),
+                            );
+                        }
+                        let volume_json = json!({"volume":current_volume});
+                        return MsgRspModel::success(topic, volume_json, None);
+                    }
+                    None => {
+                        return MsgRspModel::error(
+                            MsgType::Error,
+                            Some("未传入需要设置的音量值".to_string()),
+                        );
+                    }
+                }
+            }
+            None => {
+                return MsgRspModel::error(
+                    MsgType::Error,
+                    Some("未传入需要设置的音量".to_string()),
+                );
+            }
+        },
         MsgType::LaunchApp => match command {
             Some(value) => {
                 let command_type = value.command_type;
@@ -176,7 +254,16 @@ async fn handle_msg(text: &str, security_config: SecurityConfig) -> MsgRspModel<
                             }
                         };
                         println!("启动应用：{app_name:?}");
-                        todo!("启动应用{app_name}")
+                        match launch_app_with_to(&app_name) {
+                            Ok(()) => {
+                                return MsgRspModel::success(
+                                    topic,
+                                    json!(""),
+                                    Some("启动成功".to_string()),
+                                );
+                            }
+                            Err(e) => {}
+                        }
                     }
                     "exit" => {
                         let app_name: String = match command_param {

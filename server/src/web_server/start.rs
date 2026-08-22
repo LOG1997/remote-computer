@@ -1,5 +1,10 @@
 use std::net::SocketAddr;
+use std::sync::Arc;
+use std::thread;
 
+use crate::common::models::AudioCommand;
+use crate::system_control::control_volume::{AudioControl, VolumeControl};
+use crate::web_server::start::AudioCommand::{GetVolume, SetVolume};
 use crate::{
     WEB_ASSETS,
     common::{
@@ -20,7 +25,11 @@ use axum::{
     routing::any,
 };
 use http::StatusCode;
+use rmqtt::topic;
 use tokio::net::TcpListener;
+use tokio::sync::mpsc::{Receiver, Sender, UnboundedReceiver, UnboundedSender};
+use tokio::sync::{Mutex, mpsc, oneshot};
+use tokio::task::JoinHandle;
 use tower_http::services::ServeDir;
 
 pub async fn start_web_server(config: AppConfig) -> Result<()> {
@@ -38,9 +47,11 @@ pub async fn start_web_server(config: AppConfig) -> Result<()> {
     if !static_files_root.exists() {
         panic!("static web html files not found:{static_files_root:?} and root is {root_dir:?}");
     }
-
+    let (tx, rx) = mpsc::unbounded_channel::<AudioCommand>();
+    let _ = create_volume_control(rx, tx.clone()).await;
     let app_state = AppState {
         config: config.clone(),
+        audio_tx: tx,
     };
 
     // 如果访问 / (根路径)，ServeDir 默认会尝试查找 index.html (取决于配置，通常需确保存在)
@@ -99,4 +110,37 @@ async fn fallback_handler(req: Request<Body>) -> Response {
                 .unwrap()
         }
     }
+}
+
+async fn create_volume_control(
+    mut rx: UnboundedReceiver<AudioCommand>,
+    tx: UnboundedSender<AudioCommand>,
+) {
+    println!("射盒盒盒2");
+    thread::spawn(move || {
+        // 在新线程中初始化 COM 库 (如果需要)
+        match VolumeControl::new() {
+            Ok(mut volume_control) => {
+                while let Some(audio_command) = rx.blocking_recv() {
+                    match audio_command {
+                        AudioCommand::SetVolume { volume, reply } => {
+                            if let Err(e) = volume_control.set_volume(volume) {
+                                log::error!("设置音量失败: {:?}", e);
+                            } else {
+                                let new_volume = volume_control.get_volume().unwrap_or(0);
+                                let _ = reply.send(new_volume);
+                            }
+                        }
+                        AudioCommand::GetVolume { reply } => {
+                            let current_volume = volume_control.get_volume().unwrap_or(0);
+                            let _ = reply.send(current_volume);
+                        }
+                    }
+                }
+            }
+            Err(e) => {
+                log::error!("初始化音量控制失败: {:?}", e);
+            }
+        }
+    });
 }
