@@ -7,7 +7,7 @@ import { Button } from "@workspace/ui/components/button"
 import { Dot } from "lucide-react"
 import ShutdownDialog from './-ShutDownDialog'
 import { useState } from "react"
-import { useWebSocket } from "@/components/WebsocketProvider"
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
 import { useEffect } from 'react'
 interface OsProps {
     data: boolean,

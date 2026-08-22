@@ -5,7 +5,7 @@ import MemoryCard from "./components/MemoryCard/-index"
 import StatusCard from "./components/StatusCard/-index"
 import { useEffect } from "react"
 import { LeftHeader } from "./Header/-left"
-import { useWebSocket } from "@/components/WebsocketProvider"
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
 import { useState } from "react"
 
 export const Route = createFileRoute("/shutdown_control/dashboard/")({

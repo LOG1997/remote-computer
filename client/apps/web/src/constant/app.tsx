@@ -1,4 +1,4 @@
-import { OrayIcon, WechatIcon, BilibiliIcon, ClashIcon, SteamIcon } from '@/components/icons'
+import { OrayIcon, WechatIcon, BilibiliIcon, ClashIcon, SteamIcon, DouyinIcon, LocalsendIcon } from '@/components/icons'
 
 export const AppLaunchList = [
     {
@@ -15,9 +15,15 @@ export const AppLaunchList = [
     },
     {
         name: 'Bilibili',
-        value: 'bl',
+        value: 'bli',
         description: 'bilibili视频软件',
         icon: <BilibiliIcon className="w-10 h-10 text-pink-400" />,
+    },
+    {
+        name: '抖音',
+        value: 'douyin',
+        description: '抖音',
+        icon: <DouyinIcon className="w-10 h-10 text-black-400" />,
     },
     {
         name: 'ClashVerge',
@@ -30,5 +36,11 @@ export const AppLaunchList = [
         value: 'steam',
         description: 'steam游戏软件',
         icon: <SteamIcon className="w-10 h-10" />,
+    },
+    {
+        name: "LocalSend",
+        value: "localsend",
+        description: "本地发送软件",
+        icon: <LocalsendIcon className="w-10 h-10" />
     }
 ]

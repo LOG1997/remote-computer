@@ -57,7 +57,7 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
                     sender.send(Message::Binary(data)).await.ok();
                 }
                 _ => {
-                    println!("unknown message type");
+                    println!("unknown message type：{msg:?}");
                 }
             }
         }
@@ -253,7 +253,6 @@ async fn handle_msg(
                                 );
                             }
                         };
-                        println!("启动应用：{app_name:?}");
                         match launch_app_with_to(&app_name) {
                             Ok(()) => {
                                 return MsgRspModel::success(
@@ -262,7 +261,12 @@ async fn handle_msg(
                                     Some("启动成功".to_string()),
                                 );
                             }
-                            Err(e) => {}
+                            Err(e) => {
+                                return MsgRspModel::error(
+                                    MsgType::Error,
+                                    Some("启动失败".to_string() + e.to_string().as_str()),
+                                );
+                            }
                         }
                     }
                     "exit" => {
@@ -281,8 +285,6 @@ async fn handle_msg(
                                 );
                             }
                         };
-                        println!("退出应用：{app_name:?}");
-                        todo!("退出应用{app_name}")
                     }
                     _ => {
                         println!("nnnnn")

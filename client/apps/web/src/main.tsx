@@ -1,7 +1,7 @@
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { RouterProvider, createRouter, createHashHistory } from '@tanstack/react-router'
-import { WebSocketProvider } from "@/components/WebsocketProvider"
+import { WebSocketProvider } from "@/components/ws/WebsocketProvider"
 import "@workspace/ui/globals.css"
 import { routeTree } from './routeTree.gen'
 const hashHistory = createHashHistory()
