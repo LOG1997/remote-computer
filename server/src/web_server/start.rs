@@ -64,7 +64,8 @@ pub async fn start_web_server(config: AppConfig) -> Result<()> {
     let app = Router::new()
         .route("/user", any(user_service_handler))
         .route("/browser", any(browser_service_handler))
-        .fallback_service(fallback_handler.into_service())
+        // .fallback_service(fallback_handler.into_service())
+        .fallback_service(static_files_service)
         .with_state(app_state)
         .layer(tower_http::cors::CorsLayer::permissive());
     println!("启动web服务:http://{}", server_address);

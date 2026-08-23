@@ -280,7 +280,7 @@ async fn handle_msg(
                                 );
                             }
                         };
-                        match launch_app_with_to(&app_name) {
+                        match launch_app_with_to(&app_name.trim_matches('"')) {
                             Ok(()) => {
                                 info!("launch app success:{app_name:?}");
                                 return MsgRspModel::success(

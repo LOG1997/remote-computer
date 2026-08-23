@@ -143,7 +143,7 @@ pub fn launch_app_with_to(app_name: &str) -> Result<(), String> {
     }
     #[cfg(target_os = "linux")]
     {
-        match Command::new("sh").arg("-c").arg(command).output() {
+        match Command::new("/bin/sh").arg("-c").arg(command).output() {
             Ok(output) => {
                 if output.status.success() {
                     println!("{}", String::from_utf8_lossy(&output.stdout));
