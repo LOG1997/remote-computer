@@ -15,6 +15,7 @@ use futures_util::{
 use http::HeaderMap;
 use serde_json::{Map, Value, json};
 use tokio::sync::{mpsc::UnboundedSender, oneshot};
+use tracing::{error, info, instrument, trace, warn};
 
 use crate::{
     common::models::{
@@ -22,7 +23,7 @@ use crate::{
         SecurityConfig,
     },
     system_control::{
-        info::get_system_info_json,
+        info::{self, get_system_info_json},
         operate::{execute_reboot, execute_shutdown, launch_app_with_to},
     },
 };
@@ -66,11 +67,13 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
     .ok();
 }
 
+#[instrument]
 async fn handle_msg(
     text: &str,
     security_config: SecurityConfig,
     audio_tx: UnboundedSender<AudioCommand>,
 ) -> MsgRspModel<Value> {
+    info!("get ws msg");
     let req = match parse_message(text) {
         Ok(value) => value,
         Err(e) => {
@@ -79,6 +82,7 @@ async fn handle_msg(
     };
     let topic = req.topic;
     let command = req.command;
+    info!("topic is {topic:?}");
     match topic {
         MsgType::SystemControl => match command {
             Some(value) => {
@@ -93,12 +97,8 @@ async fn handle_msg(
                                 let imt = b.get("immediate");
                                 match psd {
                                     Some(psd_value) => {
-                                        println!(
-                                            "asssssss {:?} \n {:?}",
-                                            security_config.shutdown_key,
-                                            psd_value.to_owned()
-                                        );
                                         if security_config.shutdown_key != psd_value.to_owned() {
+                                            warn!("password is wrong");
                                             return MsgRspModel::error(
                                                 MsgType::Error,
                                                 Some("密码错误".to_string()),
@@ -106,6 +106,7 @@ async fn handle_msg(
                                         }
                                     }
                                     None => {
+                                        warn!("user's password is empty");
                                         return MsgRspModel::error(
                                             MsgType::Error,
                                             Some("没输入密码".to_string()),
@@ -124,47 +125,64 @@ async fn handle_msg(
                                 }
                             }
                             Some(_) => {
+                                warn!("user's input format is wrong");
                                 return MsgRspModel::error(
                                     MsgType::Error,
                                     Some("param请输入bool值".to_string()),
                                 );
                             }
                         };
+
                         if command_type == "shutdown" {
+                            info!("execute shutdown");
                             execute_shutdown(immediate);
                         }
                         if command_type == "reboot" {
+                            info!("execute reboot");
                             execute_reboot(immediate);
                         }
-                        println!("关机和重启命令：{command_type:?}");
                     }
                     _ => {
+                        warn!("command is not match:{command_type:?}");
                         println!("nnn");
                     }
                 };
             }
-            None => {}
+            None => {
+                warn!("command is empty");
+            }
         },
         MsgType::GetSystemInfo => match command {
             Some(value) => {
                 let command_type = value.command_type;
                 match command_type.as_str() {
                     "get_system_info" => {
-                        println!("获取系统信息");
-                        let system_info = get_system_info_json().unwrap();
-                        return MsgRspModel::success(topic, json!(system_info), None);
+                        let system_info = get_system_info_json();
+                        if let Some(info_data) = system_info {
+                            info!("get systeminfo success");
+                            return MsgRspModel::success(topic, json!(info_data), None);
+                        } else {
+                            warn!("get systeminfo fail or data is empty");
+                            return MsgRspModel::error(
+                                MsgType::Error,
+                                Some("未获取到系统信息".to_string()),
+                            );
+                        }
                     }
                     _ => {
-                        println!("nnn");
+                        warn!("command is not match:{command_type:?}");
                     }
                 };
             }
-            None => {}
+            None => {
+                warn!("command is empty");
+            }
         },
         MsgType::GetVolume => {
             let (reply_tx, reply_rx) = oneshot::channel::<u8>();
             let volume_cmd = AudioCommand::GetVolume { reply: reply_tx };
             if let Err(e) = audio_tx.send(volume_cmd) {
+                error!("volume is error:{e:?}");
                 return MsgRspModel::error(MsgType::Error, Some(e.to_string()));
             }
             let current_volume: i8 =
@@ -174,9 +192,11 @@ async fn handle_msg(
                     Err(_) => -1,
                 };
             if current_volume < 0 {
+                warn!("not get current volume");
                 return MsgRspModel::error(MsgType::Error, Some("没有获取到系统音量".to_string()));
             }
             let volume_json = json!({"volume":current_volume});
+            info!("get current volume success:{volume_json:?}");
             return MsgRspModel::success(topic, volume_json, None);
         }
         MsgType::SetVolume => match command {
@@ -187,6 +207,7 @@ async fn handle_msg(
                     Some(new_volume_value) => {
                         let new_volume_i8 = new_volume_value.as_i64().unwrap_or(-1) as i8;
                         if new_volume_i8 < 0 {
+                            warn!("user's input volume format is wrong");
                             return MsgRspModel::error(
                                 MsgType::Error,
                                 Some("数据格式化出错，请检查你的传入数据".to_string()),
@@ -209,15 +230,18 @@ async fn handle_msg(
                                 Err(_) => -1,
                             };
                         if current_volume < 0 {
+                            warn!("not get volume after set");
                             return MsgRspModel::error(
                                 MsgType::Error,
                                 Some("没有获取到系统音量".to_string()),
                             );
                         }
                         let volume_json = json!({"volume":current_volume});
+                        info!("set volume success and get success: {volume_json:?}");
                         return MsgRspModel::success(topic, volume_json, None);
                     }
                     None => {
+                        warn!("sorry ,but user is not input the volume that needed");
                         return MsgRspModel::error(
                             MsgType::Error,
                             Some("未传入需要设置的音量值".to_string()),
@@ -226,6 +250,7 @@ async fn handle_msg(
                 }
             }
             None => {
+                warn!("sorry ,but user is not input the volume that needed");
                 return MsgRspModel::error(
                     MsgType::Error,
                     Some("未传入需要设置的音量".to_string()),
@@ -240,6 +265,7 @@ async fn handle_msg(
                     "launch" => {
                         let app_name: String = match command_param {
                             None => {
+                                warn!("user is not input app_name");
                                 return MsgRspModel::error(
                                     MsgType::Error,
                                     Some("请输入需要启动的app名称".to_string()),
@@ -247,6 +273,7 @@ async fn handle_msg(
                             }
                             Some(Value::String(s)) => s,
                             Some(_) => {
+                                warn!("user is not input app_name with correct format");
                                 return MsgRspModel::error(
                                     MsgType::Error,
                                     Some("您输入的应用名称格式不对，请输入字符串".to_string()),
@@ -255,6 +282,7 @@ async fn handle_msg(
                         };
                         match launch_app_with_to(&app_name) {
                             Ok(()) => {
+                                info!("launch app success:{app_name:?}");
                                 return MsgRspModel::success(
                                     topic,
                                     json!(""),
@@ -262,6 +290,7 @@ async fn handle_msg(
                                 );
                             }
                             Err(e) => {
+                                warn!("launch app fail:{app_name:?},this error is :{e:?}");
                                 return MsgRspModel::error(
                                     MsgType::Error,
                                     Some("启动失败".to_string() + e.to_string().as_str()),
@@ -272,6 +301,7 @@ async fn handle_msg(
                     "exit" => {
                         let app_name: String = match command_param {
                             None => {
+                                warn!("user is not input app_name");
                                 return MsgRspModel::error(
                                     MsgType::Error,
                                     Some("请输入需要退出的app名称".to_string()),
@@ -279,6 +309,7 @@ async fn handle_msg(
                             }
                             Some(Value::String(s)) => s,
                             Some(_) => {
+                                warn!("user is not input app_name with correct format");
                                 return MsgRspModel::error(
                                     MsgType::Error,
                                     Some("您输入的应用名称格式不对，请输入字符串".to_string()),
@@ -314,6 +345,7 @@ async fn handle_msg(
             None => {}
         },
         MsgType::Ping => {
+            trace!("ws ping");
             println!("this is ping");
         }
         _ => {

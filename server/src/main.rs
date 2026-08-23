@@ -5,16 +5,15 @@ mod system_control;
 mod web_server;
 
 use dotenvy::dotenv;
-use tokio::signal;
 use tokio::task::JoinHandle;
 
 use anyhow::{Ok, Result};
 
-use crate::{
-    system_control::control_volume::{AudioControl, VolumeControl},
-    web_server::start::start_web_server,
-};
+use crate::web_server::start::start_web_server;
 use include_dir::{Dir, include_dir};
+
+use tracing_appender::rolling::{RollingFileAppender, Rotation};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 static WEB_ASSETS: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/web");
 
@@ -24,6 +23,28 @@ async fn main() -> Result<()> {
     rustls::crypto::ring::default_provider()
         .install_default()
         .expect("Failed to install rustls crypto provider");
+
+    // 日志记录
+    let file_appender = RollingFileAppender::builder()
+        .rotation(Rotation::DAILY)
+        .max_log_files(30)
+        .filename_prefix("remote-computer")
+        .filename_suffix("log")
+        .build("./logs")
+        .expect("创建日志服务失败");
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
+    let file_layer = fmt::layer()
+        .with_writer(non_blocking)
+        .with_ansi(false)
+        .with_target(true);
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(file_layer)
+        .with(env_filter)
+        .init();
     // 获取配置文件路径（不存在就创建）
     let config_path = common::config::get_init_config();
     let app_config = AppConfig::from_file(&config_path.to_str().unwrap())?;
