@@ -110,6 +110,7 @@ impl<T> MsgRspModel<T> {
 pub struct AppConfig {
     pub web_server: WebServerConfig,
     pub security: SecurityConfig,
+    pub launch_apps: serde_json::Value,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -140,6 +141,10 @@ impl AppConfig {
     // 获取security配置也就是密码
     pub fn get_security(&self) -> &SecurityConfig {
         &self.security
+    }
+    // 获取启动app的信息
+    pub fn get_launch_app(&self) -> &serde_json::Value {
+        &self.launch_apps
     }
 }
 

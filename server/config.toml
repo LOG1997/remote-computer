@@ -22,3 +22,14 @@ launch_app = { "wechat" = "微信", "steam" = "Steam", "tailscale" = "Tailscale"
 
 [security]
 shutdown_key = "yes"
+
+[launch_apps]
+douyin = "https://www.douyin.com/?recommend=1"
+bli = "https://www.bilibili.com/"
+ds = "https://chat.deepseek.com/"
+clash = "clash-verge"
+github = "https://github.com/log1997"
+localsend = "localsend_app"
+oray = "awesun"
+steam = "steam"
+wx = "wechat"

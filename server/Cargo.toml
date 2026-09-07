@@ -41,3 +41,4 @@ tracing-appender = "0.2.5"
 tracing-subscriber = {version="0.3.23",features = ["env-filter"]}
 volumecontrol = "0.1.4"
 warp = "0.4.3"
+webbrowser = "1.2.4"

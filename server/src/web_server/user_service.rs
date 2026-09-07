@@ -18,9 +18,12 @@ use tokio::sync::{mpsc::UnboundedSender, oneshot};
 use tracing::{error, info, instrument, trace, warn};
 
 use crate::{
-    common::models::{
-        AppState, AudioCommand, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth,
-        SecurityConfig,
+    common::{
+        launch_apps::{self, launch_app, match_app_name},
+        models::{
+            AppState, AudioCommand, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth,
+            SecurityConfig,
+        },
     },
     system_control::{
         info::{self, get_system_info_json},
@@ -43,13 +46,19 @@ async fn handle_socket(socket: WebSocket, state: AppState) {
     let audio_tx = state.audio_tx;
     let config = state.config;
     let security_config = config.security;
+    let launch_apps = config.launch_apps;
     let (mut sender, mut receiver) = socket.split();
     tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
             match msg {
                 Message::Text(text) => {
-                    let json_msg =
-                        handle_msg(text.as_str(), security_config.clone(), audio_tx.clone()).await;
+                    let json_msg = handle_msg(
+                        text.as_str(),
+                        security_config.clone(),
+                        audio_tx.clone(),
+                        &launch_apps,
+                    )
+                    .await;
                     let message_text = serde_json::to_string(&json_msg).unwrap_or_default();
                     sender.send(Message::Text(message_text.into())).await.ok();
                 }
@@ -72,6 +81,7 @@ async fn handle_msg(
     text: &str,
     security_config: SecurityConfig,
     audio_tx: UnboundedSender<AudioCommand>,
+    launch_apps: &serde_json::Value,
 ) -> MsgRspModel<Value> {
     info!("get ws msg");
     let req = match parse_message(text) {
@@ -280,21 +290,26 @@ async fn handle_msg(
                                 );
                             }
                         };
-                        match launch_app_with_to(&app_name.trim_matches('"')) {
+                        let target_app =
+                            match_app_name(launch_apps, &app_name).unwrap_or("".to_string());
+                        if target_app.is_empty() {
+                            warn!("app_name:{app_name:?} not found");
+                            return MsgRspModel::error(
+                                MsgType::Error,
+                                Some("未找到该app，请前往配置文件配置".to_string()),
+                            );
+                        }
+                        match launch_app(target_app, Vec::new()) {
                             Ok(()) => {
                                 info!("launch app success:{app_name:?}");
                                 return MsgRspModel::success(
                                     topic,
                                     json!(""),
-                                    Some("启动成功".to_string()),
+                                    Some("启动成功:".to_string() + &app_name),
                                 );
                             }
                             Err(e) => {
                                 warn!("launch app fail:{app_name:?},this error is :{e:?}");
-                                return MsgRspModel::error(
-                                    MsgType::Error,
-                                    Some("启动失败".to_string() + e.to_string().as_str()),
-                                );
                             }
                         }
                     }
