@@ -53,7 +53,8 @@ pub struct CommandType {
     /// 命令类型
     pub command_type: String,
     pub param: Option<Value>,
-    pub direction: Option<String>,
+    pub data: Option<String>,
+    pub payload: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]

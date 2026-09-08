@@ -2,39 +2,20 @@ use std::sync::Arc;
 
 use anyhow::Result;
 use axum::{
-    Json,
     extract::{
-        ConnectInfo, Query, State,
+        Query, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     response::Response,
 };
-use chrono::Utc;
-use futures_util::{
-    sink::SinkExt,
-    stream::{SplitSink, SplitStream, StreamExt},
-};
+use futures_util::{sink::SinkExt, stream::StreamExt};
 use http::HeaderMap;
-use serde_json::{Map, Value, json};
-use tokio::sync::{
-    Mutex,
-    mpsc::{self, UnboundedSender},
-    oneshot,
-};
+use serde_json::{Value, json};
+use tokio::sync::Mutex;
 use tracing::{error, info, instrument, trace, warn};
 
-use crate::{
-    common::{
-        launch_apps::{self, launch_app, match_app_name},
-        models::{
-            AppState, AudioCommand, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth,
-            SecurityConfig,
-        },
-    },
-    system_control::{
-        info::{self, get_system_info_json},
-        operate::{execute_reboot, execute_shutdown, launch_app_with_to},
-    },
+use crate::common::models::{
+    AppState, MsgReqModel, MsgRspModel, MsgType, QueryAuth, SecurityConfig,
 };
 
 pub async fn browser_service_handler(
@@ -56,8 +37,6 @@ async fn handle_socket(socket: WebSocket, state: AppState, path: String) {
     let (_, mut user_rx) = (state.user_tx.clone(), state.user_tx.subscribe());
 
     let inner_msg_task = {
-        let security = security_config.clone();
-        let launch = launch_apps.clone();
         let sender_inner = sender_arc.clone();
         tokio::spawn(async move {
             while let Ok(msg) = user_rx.recv().await {
@@ -65,8 +44,6 @@ async fn handle_socket(socket: WebSocket, state: AppState, path: String) {
                     "[{}] Received from broadcast this is broswer, sending to client: {}",
                     path, msg
                 );
-                // let json_msg = handle_msg(msg.as_str(), &security, &launch).await;
-                // let message_text = serde_json::to_string(&json_msg).unwrap_or_default();
                 sender_inner
                     .lock()
                     .await

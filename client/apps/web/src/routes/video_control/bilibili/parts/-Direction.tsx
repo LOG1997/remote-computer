@@ -18,11 +18,13 @@ export function DirectionPart() {
     }
     const handleEnter = () => {
         sendMessage({
-            topic: "GetSystemInfo",
+            topic: "BrowserControl",
             token: "1231212",
             date_time: new Date().getTime(),
             command: {
-                command_type: "get_system_info",
+                command_type: "bilibili",
+                param: "bli",
+                direction: "enter",
             },
         })
     }
@@ -30,7 +32,7 @@ export function DirectionPart() {
     return (<div className='w-full flex justify-center'>
 
         <div className="relative w-2/3 aspect-square rounded-full bg-linear-to-br from-gray-700 to-gray-900 shadow-2xl shadow-black/50 flex items-center justify-center p-4">
-            {/* 使用 grid 3x3 布局 */}
+        {/* 使用 grid 3x3 布局 */}
             <div className="grid grid-cols-3 grid-rows-3 gap-2 w-full h-full">
                 {/* 上 */}
                 <button

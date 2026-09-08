@@ -1,14 +1,20 @@
 import { Undo2, Redo2 } from "lucide-react";
 import { Button } from '@workspace/ui/components/button'
-import { useMqtt } from '@/components/mqtt/MqttContext'
-// 快进 快退 全屏 
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
+// 快进 快退 全屏
 export function VideoOption() {
-    const { publish } = useMqtt()
+ const { sendMessage, subscribe, readyState } = useWebSocket()
     const handleNavigate = (direction: 'back' | 'forward') => {
         navigator.vibrate(50)
-        publish('tv-web/log1997/receive', {
-            action: 'navigate',
-            data: direction
+        sendMessage({
+            topic: "BrowserControl",
+            token: "1231212",
+            date_time: new Date().getTime(),
+            command: {
+              command_type: "douyin",
+              param:"enter",
+                payload:""
+            },
         })
     }
     return (
