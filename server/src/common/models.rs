@@ -1,11 +1,14 @@
 use anyhow::Result;
-use std::{path::PathBuf, sync::Arc};
-use tokio::sync::{Mutex, mpsc::UnboundedSender, oneshot};
-use volumecontrol::AudioDevice;
-
+use axum::extract::ws::{Message, WebSocket};
 use chrono::{DateTime, Utc};
+use futures_util::{sink::SinkExt, stream::StreamExt};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
+use std::{path::PathBuf, sync::Arc};
+use tokio::sync::{Mutex, broadcast, mpsc::UnboundedSender, oneshot};
+
+pub type WsSender = futures_util::stream::SplitSink<WebSocket, Message>;
 
 #[derive(Debug)]
 pub enum AudioCommand {
@@ -21,6 +24,8 @@ pub enum AudioCommand {
 pub struct AppState {
     pub config: AppConfig,
     pub audio_tx: UnboundedSender<AudioCommand>,
+    pub user_tx: broadcast::Sender<String>, // 用于 /user 路径的广播
+    pub browser_tx: broadcast::Sender<String>, // 用于 /browser 路径的广播
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -48,6 +53,7 @@ pub struct CommandType {
     /// 命令类型
     pub command_type: String,
     pub param: Option<Value>,
+    pub direction: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -110,7 +116,7 @@ impl<T> MsgRspModel<T> {
 pub struct AppConfig {
     pub web_server: WebServerConfig,
     pub security: SecurityConfig,
-    pub launch_apps: serde_json::Value,
+    pub launch_apps: Option<serde_json::Value>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -143,8 +149,8 @@ impl AppConfig {
         &self.security
     }
     // 获取启动app的信息
-    pub fn get_launch_app(&self) -> &serde_json::Value {
-        &self.launch_apps
+    pub fn get_launch_app(&self) -> Option<serde_json::Value> {
+        self.launch_apps.clone()
     }
 }
 

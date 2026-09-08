@@ -1,8 +1,21 @@
+use crate::{
+    common::{
+        launch_apps::{self, launch_app, match_app_name},
+        models::{
+            AppState, AudioCommand, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth,
+            SecurityConfig, WsSender,
+        },
+    },
+    system_control::{
+        info::{self, get_system_info_json},
+        operate::{execute_reboot, execute_shutdown, launch_app_with_to},
+    },
+};
 use anyhow::Result;
 use axum::{
     Json,
     extract::{
-        ConnectInfo, Query, State,
+        ConnectInfo, Path, Query, State,
         ws::{Message, WebSocket, WebSocketUpgrade},
     },
     response::Response,
@@ -14,22 +27,11 @@ use futures_util::{
 };
 use http::HeaderMap;
 use serde_json::{Map, Value, json};
-use tokio::sync::{mpsc::UnboundedSender, oneshot};
+use std::collections::HashMap;
+use std::{path::PathBuf, sync::Arc};
+use tokio::sync::broadcast;
+use tokio::sync::{Mutex, mpsc::UnboundedSender, oneshot};
 use tracing::{error, info, instrument, trace, warn};
-
-use crate::{
-    common::{
-        launch_apps::{self, launch_app, match_app_name},
-        models::{
-            AppState, AudioCommand, MsgReqModel, MsgRspModel, MsgType, ParamValue, QueryAuth,
-            SecurityConfig,
-        },
-    },
-    system_control::{
-        info::{self, get_system_info_json},
-        operate::{execute_reboot, execute_shutdown, launch_app_with_to},
-    },
-};
 
 pub async fn user_service_handler(
     State(app_state): State<AppState>,
@@ -38,25 +40,30 @@ pub async fn user_service_handler(
     Query(token): Query<QueryAuth>,
 ) -> Response {
     println!("开始websocket连接");
+    // println!("路径是{path}");
 
-    ws.on_upgrade(|socket| handle_socket(socket, app_state))
+    ws.on_upgrade(|socket| handle_socket(socket, app_state, "/user".to_string()))
 }
 
-async fn handle_socket(socket: WebSocket, state: AppState) {
+async fn handle_socket(socket: WebSocket, state: AppState, path: String) {
     let audio_tx = state.audio_tx;
     let config = state.config;
     let security_config = config.security;
     let launch_apps = config.launch_apps;
+    let (user_tx, mut user_rx) = (state.user_tx.clone(), state.user_tx.subscribe());
     let (mut sender, mut receiver) = socket.split();
+
     tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
+            println!("收到雕塑");
             match msg {
                 Message::Text(text) => {
                     let json_msg = handle_msg(
                         text.as_str(),
                         security_config.clone(),
                         audio_tx.clone(),
-                        &launch_apps,
+                        launch_apps.clone(),
+                        user_tx.clone(),
                     )
                     .await;
                     let message_text = serde_json::to_string(&json_msg).unwrap_or_default();
@@ -81,7 +88,9 @@ async fn handle_msg(
     text: &str,
     security_config: SecurityConfig,
     audio_tx: UnboundedSender<AudioCommand>,
-    launch_apps: &serde_json::Value,
+    launch_apps: Option<serde_json::Value>,
+    user_tx: broadcast::Sender<String>,
+    // connections: Arc<Mutex<HashMap<String, WsSender>>>,
 ) -> MsgRspModel<Value> {
     info!("get ws msg");
     let req = match parse_message(text) {
@@ -90,8 +99,8 @@ async fn handle_msg(
             return MsgRspModel::error(MsgType::Error, Some(e.to_string()));
         }
     };
-    let topic = req.topic;
-    let command = req.command;
+    let topic = req.clone().topic;
+    let command = req.clone().command;
     info!("topic is {topic:?}");
     match topic {
         MsgType::SystemControl => match command {
@@ -269,6 +278,13 @@ async fn handle_msg(
         },
         MsgType::LaunchApp => match command {
             Some(value) => {
+                if launch_apps.is_none() {
+                    warn!("launch_apps is none");
+                    return MsgRspModel::error(
+                        MsgType::Error,
+                        Some("启动app功能未启用".to_string()),
+                    );
+                }
                 let command_type = value.command_type;
                 let command_param = value.param;
                 match command_type.as_str() {
@@ -290,8 +306,9 @@ async fn handle_msg(
                                 );
                             }
                         };
+                        let config_apps = launch_apps.as_ref().unwrap();
                         let target_app =
-                            match_app_name(launch_apps, &app_name).unwrap_or("".to_string());
+                            match_app_name(config_apps, &app_name).unwrap_or("".to_string());
                         if target_app.is_empty() {
                             warn!("app_name:{app_name:?} not found");
                             return MsgRspModel::error(
@@ -339,26 +356,19 @@ async fn handle_msg(
             }
             None => {}
         },
-        MsgType::BrowserControl => match command {
-            Some(value) => {
-                let command_type = value.command_type;
-                let command_param = value.param;
-                match command_type.as_str() {
-                    "bilibili" => {
-                        println!("向bilibili发送消息");
-                        todo!("向bilibili发送消息")
+        MsgType::BrowserControl => {
+            if let Ok(json) = serde_json::to_string(&req) {
+                println!("[user] Broadcasted JSON: {}", json);
+                match user_tx.send(json) {
+                    Ok(receiver_count) => {
+                        println!("[user] Broadcast sent to {} receivers", receiver_count)
                     }
-                    "douyin" => {
-                        println!("向抖音发送消息");
-                        todo!("向抖音发送消息")
-                    }
-                    _ => {
-                        println!("nnnnn")
-                    }
+                    Err(e) => eprintln!("[user] Broadcast failed: {}", e),
                 }
+            } else {
+                eprintln!("[user] Failed to serialize request");
             }
-            None => {}
-        },
+        }
         MsgType::Ping => {
             trace!("ws ping");
             println!("this is ping");

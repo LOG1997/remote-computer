@@ -7,11 +7,11 @@ import {
     NavigationMenuTrigger,
 } from "@workspace/ui/components/navigation-menu"
 import { globalActions } from '@/constant/globalActions'
-import { useMqtt } from '@/components/mqtt/MqttContext'
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
 export function RightHeader() {
-    const mqttClient = useMqtt()
+    const { sendMessage, subscribe, readyState } = useWebSocket()
     const handleSelect = (item: any) => {
-        mqttClient.publish('tv-web/log1997/receive', {
+        sendMessage({
             action: 'global',
             data: item.value,
         })

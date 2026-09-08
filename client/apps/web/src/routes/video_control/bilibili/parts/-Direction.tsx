@@ -1,19 +1,29 @@
 import { ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from 'lucide-react'
-import { useMqtt } from '@/components/mqtt/MqttContext'
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
 
 export function DirectionPart() {
-    const mqttClient = useMqtt()
+    const { sendMessage, subscribe, readyState } = useWebSocket()
     const handleMove = (direction: 'up' | 'down' | 'left' | 'right') => {
         navigator.vibrate(50)
-        mqttClient.publish('tv-web/log1997/receive', {
-            action: 'bilibili',
-            data: direction
+        sendMessage({
+            topic: "BrowserControl",
+            token: "1231212",
+            date_time: new Date().getTime(),
+            command: {
+                command_type: "bilibili",
+                param: "bli",
+                direction,
+            },
         })
     }
     const handleEnter = () => {
-        mqttClient.publish('tv-web/log1997/receive', {
-            action: 'bilibili',
-            data: 'enter'
+        sendMessage({
+            topic: "GetSystemInfo",
+            token: "1231212",
+            date_time: new Date().getTime(),
+            command: {
+                command_type: "get_system_info",
+            },
         })
     }
 

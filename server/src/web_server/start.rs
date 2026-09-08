@@ -1,7 +1,3 @@
-use std::net::SocketAddr;
-use std::sync::Arc;
-use std::thread;
-
 use crate::common::models::AudioCommand;
 use crate::system_control::control_volume::{AudioControl, VolumeControl};
 use crate::web_server::start::AudioCommand::{GetVolume, SetVolume};
@@ -26,9 +22,13 @@ use axum::{
 };
 use http::StatusCode;
 use rmqtt::topic;
+use std::collections::HashMap;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use std::thread;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::{Receiver, Sender, UnboundedReceiver, UnboundedSender};
-use tokio::sync::{Mutex, mpsc, oneshot};
+use tokio::sync::{Mutex, broadcast, mpsc, oneshot};
 use tokio::task::JoinHandle;
 use tower_http::services::ServeDir;
 
@@ -49,9 +49,13 @@ pub async fn start_web_server(config: AppConfig) -> Result<()> {
     }
     let (tx, rx) = mpsc::unbounded_channel::<AudioCommand>();
     let _ = create_volume_control(rx, tx.clone()).await;
+    let (user_tx, _) = broadcast::channel(100);
+    let (browser_tx, _) = broadcast::channel(100);
     let app_state = AppState {
         config: config.clone(),
         audio_tx: tx,
+        user_tx,
+        browser_tx,
     };
 
     // 如果访问 / (根路径)，ServeDir 默认会尝试查找 index.html (取决于配置，通常需确保存在)

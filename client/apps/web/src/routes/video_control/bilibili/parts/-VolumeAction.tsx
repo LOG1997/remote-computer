@@ -1,43 +1,47 @@
 import { Slider } from "@workspace/ui/components/slider"
 import { useState, useEffect, useRef, useMemo } from "react"
-import { useMqtt } from "@/components/mqtt/MqttContext"
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
 import { Volume2, VolumeOff } from "lucide-react"
 import { debounce } from 'lodash-es';
 export function VolumeAction() {
-    const { onMessage, subscribe, publish } = useMqtt()
+    const { sendMessage, subscribe, readyState } = useWebSocket()
     const [volumeValue, setVolumeValue] = useState([0])
     const [volumeMute, setVolumeMute] = useState(false)
     // ref 用于标记当前是否正在由用户拖动滑块
     const isInteractingRef = useRef(false);
     useEffect(() => {
-        subscribe('tv-web/volume/state/send')
-        publish('tv-web/volume/state/receive', "0")
-        const unsubscribe = onMessage((msg) => {
-            // 这里会立即执行，不依赖 React 渲染周期
-
-            if (msg.topic === 'tv-web/volume/state/send') {
-                if (!isInteractingRef.current) {
-                    const data = JSON.parse(msg.payload);
-                    console.log('⚡ 设置音量', data);
-
-                    const volume = data.volume;
-                    const mute = data.mute; // 如果后续需要用到 mute 也可以保留
-                    setVolumeMute(mute);
-                    setVolumeValue([volume]);
-                }
+        sendMessage({
+            "topic": "GetVolume",
+            "token": "1231212",
+            "date_time": new Date().getTime(),
+            "command": {
+                "command_type": "GetVolume"
             }
-        });
+        })
+        // 订阅 'get_system_info' 类型的消息
+        const unsubscribe = subscribe((data: any) => {
+            console.log("收到声音消息", data)
+            if (data && data.volume) {
+                setVolumeValue([data.volume]);
+            }
+        }, "GetVolume")
 
-        // 组件卸载或依赖变化时，取消注册，防止内存泄漏
-        return () => {
-            unsubscribe();
-        };
-    }, [])
+        return unsubscribe // 组件卸载时自动取消订阅
+    }, [subscribe])
+
     // 在组件外部或内部创建防抖函数
     // mute发送switch才是切换，其他的不执行操作
     const debouncedPublish = useMemo(() => {
         return debounce((publishFn: (topic: string, message: any) => void, val: number, mute: string) => {
-            publishFn('tv-web/control/volume', JSON.stringify({ mute, volume: val }));
+            sendMessage({
+                "topic": "SetVolume",
+                "token": "1231212",
+                "date_time": new Date().getTime(),
+                "command": {
+                    "command_type": "SetVolume",
+                    "param": val
+                }
+            });
         }, 200);
     }, []);
     useEffect(() => {
@@ -47,7 +51,7 @@ export function VolumeAction() {
     }, [debouncedPublish]);
     const onChangeVolume = (value: number[]) => {
         setVolumeValue(value);
-        debouncedPublish(publish, value[0], "none");
+        debouncedPublish(sendMessage, value[0], "none");
     }
     const onChangeVolumeStart = () => {
         navigator.vibrate?.(50);
@@ -61,7 +65,7 @@ export function VolumeAction() {
     const onChangeMute = () => {
         navigator.vibrate?.(50);
         setVolumeMute(!volumeMute);
-        debouncedPublish(publish, volumeValue[0], 'switch');
+        debouncedPublish(sendMessage, volumeValue[0], 'switch');
     }
     return (
         <div className="flex w-full max-w-sm gap-4 justify-center items-center" >

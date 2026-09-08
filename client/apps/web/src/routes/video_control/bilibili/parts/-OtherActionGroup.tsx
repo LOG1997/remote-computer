@@ -12,14 +12,14 @@ import {
 } from "@workspace/ui/components/dialog"
 import { Input } from "@workspace/ui/components/input"
 import { Label } from "@workspace/ui/components/label"
-import { useMqtt } from '@/components/mqtt/MqttContext'
+import { useWebSocket } from "@/components/ws/WebsocketProvider"
 import { useState } from "react"
 export function OtherActionGroup() {
     const [searchValue, setSearchValue] = useState('')
-    const mqttClient = useMqtt()
+    const { sendMessage, subscribe, readyState } = useWebSocket()
     const handleSearch = () => {
         navigator.vibrate(100)
-        mqttClient.publish('tv-web/log1997/receive', {
+        sendMessage({
             action: 'bilibili',
             data: 'search',
             payload: searchValue
@@ -27,7 +27,7 @@ export function OtherActionGroup() {
     }
     const openHistory = () => {
         navigator.vibrate(100)
-        mqttClient.publish('tv-web/log1997/receive', {
+        sendMessage({
             action: 'bilibili',
             data: 'history',
             payload: ''
@@ -35,7 +35,7 @@ export function OtherActionGroup() {
     }
     const openPostPage = () => {
         navigator.vibrate(100)
-        mqttClient.publish('tv-web/log1997/receive', {
+        sendMessage({
             action: 'bilibili',
             data: 'post',
             payload: ''

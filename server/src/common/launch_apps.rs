@@ -1,6 +1,10 @@
 use anyhow::{Ok, Result};
 use std::process::{Command, Stdio};
+use tracing::info;
 pub fn match_app_name(apps_list: &serde_json::Value, app_name: &str) -> Option<String> {
+    if apps_list.is_null() {
+        return None;
+    }
     apps_list
         .as_object()?
         .get(app_name)?
@@ -21,7 +25,9 @@ pub fn launch_app(app_name: String, params: Vec<String>) -> Result<()> {
 fn open_web_page(url: String, params: Vec<String>) -> Result<()> {
     // 不用区分环境了，webbrowser已经做了
     let result = insert_into_template(url.as_str(), params.join(" ").as_str());
+    info!("web url {}", result);
     webbrowser::open(result.as_str())?;
+    info!("open url sucsss");
     Ok(())
 }
 
